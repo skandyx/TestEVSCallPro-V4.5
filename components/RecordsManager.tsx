@@ -47,13 +47,13 @@ const RecordsManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     };
 
     return (
-        <div className="space-y-8">
-            <header>
+        <div className="h-full flex flex-col">
+            <header className="flex-shrink-0 mb-8">
                 <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
                 <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
             </header>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-md border dark:border-slate-700">
+            <div className="flex-1 min-h-0 flex flex-col bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="flex-shrink-0 grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-md border dark:border-slate-700">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">{t('recordsManager.filters.date')}</label>
                         <input type="date" value={filters.date} onChange={e => setFilters(f => ({...f, date: e.target.value}))} className="mt-1 w-full p-2 border rounded-md dark:bg-slate-900 dark:border-slate-600"/>
@@ -74,17 +74,19 @@ const RecordsManager: React.FC<{ feature: Feature }> = ({ feature }) => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="flex-1 min-h-0 overflow-y-auto">
                     <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                        <thead className="bg-slate-50 dark:bg-slate-700"><tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('recordsManager.headers.dateTime')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.agent')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.campaign')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('recordsManager.headers.calledNumber')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('recordsManager.headers.duration')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Écouter</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.actions')}</th>
-                        </tr></thead>
+                        <thead className="bg-white dark:bg-slate-800 sticky top-0 z-10">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('recordsManager.headers.dateTime')}</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.agent')}</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.campaign')}</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('recordsManager.headers.calledNumber')}</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('recordsManager.headers.duration')}</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">Écouter</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.actions')}</th>
+                            </tr>
+                        </thead>
                         <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
                             {paginatedRecords.map(record => (
                                 <tr key={record.id}>
@@ -107,14 +109,14 @@ const RecordsManager: React.FC<{ feature: Feature }> = ({ feature }) => {
                      {filteredRecords.length === 0 && (
                         <p className="text-center text-slate-500 py-8">{t('recordsManager.noRecords')}</p>
                     )}
+                    {totalPages > 1 && <div className="flex justify-between items-center mt-4 text-sm">
+                        <p className="text-slate-600 dark:text-slate-400">{t('recordsManager.pagination', { currentPage, totalPages })}</p>
+                        <div className="flex gap-2">
+                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1 border rounded-md disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-700">{t('common.previous')}</button>
+                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1 border rounded-md disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-700">{t('common.next')}</button>
+                        </div>
+                    </div>}
                 </div>
-                {totalPages > 1 && <div className="flex justify-between items-center mt-4 text-sm">
-                    <p className="text-slate-600 dark:text-slate-400">{t('recordsManager.pagination', { currentPage, totalPages })}</p>
-                    <div className="flex gap-2">
-                        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1 border rounded-md disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-700">{t('common.previous')}</button>
-                        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1 border rounded-md disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-700">{t('common.next')}</button>
-                    </div>
-                </div>}
             </div>
         </div>
     );

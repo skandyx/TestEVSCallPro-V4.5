@@ -136,22 +136,24 @@ const SupervisionDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
     );
 
     return (
-        <div className="space-y-6">
-            <header>
-                <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
-                <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
-            </header>
-    
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <KpiCard title={t('supervision.kpis.agentsReady')} value={kpis.agentsReady} icon="person" />
-                <KpiCard title={t('supervision.kpis.agentsOnCall')} value={kpis.agentsOnCall} icon="call" />
-                <KpiCard title={t('supervision.kpis.agentsOnWrapup')} value={kpis.agentsOnWrapup} icon="history_toggle_off" />
-                <KpiCard title={t('supervision.kpis.agentsOnPause')} value={kpis.agentsOnPause} icon="pause_circle" />
-                <KpiCard title={t('supervision.kpis.activeCalls')} value={kpis.activeCalls} icon="phone_in_talk" />
+        <div className="h-full flex flex-col">
+            <div className="flex-shrink-0 space-y-6">
+                <header>
+                    <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
+                    <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
+                </header>
+        
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <KpiCard title={t('supervision.kpis.agentsReady')} value={kpis.agentsReady} icon="person" />
+                    <KpiCard title={t('supervision.kpis.agentsOnCall')} value={kpis.agentsOnCall} icon="call" />
+                    <KpiCard title={t('supervision.kpis.agentsOnWrapup')} value={kpis.agentsOnWrapup} icon="history_toggle_off" />
+                    <KpiCard title={t('supervision.kpis.agentsOnPause')} value={kpis.agentsOnPause} icon="pause_circle" />
+                    <KpiCard title={t('supervision.kpis.activeCalls')} value={kpis.activeCalls} icon="phone_in_talk" />
+                </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="border-b border-slate-200 dark:border-slate-700">
+            <div className="mt-6 flex-1 min-h-0 flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="flex-shrink-0 border-b border-slate-200 dark:border-slate-700">
                     <nav className="-mb-px flex space-x-4 px-6" aria-label="Tabs">
                         <TabButton tabName="agents" labelKey="supervision.tabs.agents" icon="group" />
                         <TabButton tabName="calls" labelKey="supervision.tabs.calls" icon="call" />
@@ -160,7 +162,7 @@ const SupervisionDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
                         <TabButton tabName="sites" labelKey="supervision.tabs.sites" icon="corporate_fare" />
                     </nav>
                 </div>
-                <div className="p-4">
+                <div className="flex-1 min-h-0 overflow-y-auto p-4">
                     {renderContent()}
                 </div>
             </div>

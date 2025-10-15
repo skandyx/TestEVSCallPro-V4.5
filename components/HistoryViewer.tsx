@@ -82,13 +82,13 @@ const HistoryViewer: React.FC<{ feature: Feature }> = ({ feature }) => {
     };
 
     return (
-        <div className="space-y-8">
-            <header>
+        <div className="h-full flex flex-col">
+            <header className="flex-shrink-0 mb-8">
                 <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
                 <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
             </header>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-md border dark:border-slate-700">
+            <div className="flex-1 min-h-0 flex flex-col bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="flex-shrink-0 grid grid-cols-1 md:grid-cols-6 gap-4 mb-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-md border dark:border-slate-700">
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">{t('history.filters.searchTerm')}</label>
                         <input type="search" name="searchTerm" value={filters.searchTerm} onChange={handleFilterChange} placeholder={t('history.filters.searchPlaceholder')} className="mt-1 w-full p-2 border rounded-md dark:bg-slate-900 dark:border-slate-600"/>
@@ -120,26 +120,27 @@ const HistoryViewer: React.FC<{ feature: Feature }> = ({ feature }) => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="flex-1 min-h-0 overflow-y-auto">
                     <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                        <thead className="bg-slate-50 dark:bg-slate-700"><tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('history.headers.dateTime')}</th>
-                            <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('history.headers.direction')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.agent')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.campaign')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('history.headers.contactName')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('history.headers.number')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('history.headers.duration')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('history.headers.qualification')}</th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.actions')}</th>
-                        </tr></thead>
+                        <thead className="bg-white dark:bg-slate-800 sticky top-0 z-10">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('history.headers.dateTime')}</th>
+                                <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('history.headers.direction')}</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.agent')}</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.campaign')}</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('history.headers.contactName')}</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('history.headers.number')}</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('history.headers.duration')}</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('history.headers.qualification')}</th>
+                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.actions')}</th>
+                            </tr>
+                        </thead>
                         <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
                             {paginatedRecords.map(record => (
                                 <tr key={record.id}>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{new Date(record.startTime).toLocaleString('fr-FR')}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex justify-center">
-                                            {/* FIX: Removed the `title` prop from icon components and wrapped them in a `span` with a title attribute for tooltips, resolving a TypeScript error. */}
                                             {record.direction === 'inbound' ? <span title={t('history.inbound')}><InboxArrowDownIcon className="w-5 h-5 text-green-500" /></span> : <span title={t('history.outbound')}><PhoneArrowUpRightIcon className="w-5 h-5 text-blue-500" /></span>}
                                         </div>
                                     </td>
@@ -159,14 +160,14 @@ const HistoryViewer: React.FC<{ feature: Feature }> = ({ feature }) => {
                      {filteredRecords.length === 0 && (
                         <p className="text-center text-slate-500 py-8">{t('history.noRecords')}</p>
                     )}
+                    {totalPages > 1 && <div className="flex justify-between items-center mt-4 text-sm">
+                        <p className="text-slate-600 dark:text-slate-400">{t('history.pagination', { currentPage, totalPages, totalRecords: filteredRecords.length })}</p>
+                        <div className="flex gap-2">
+                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1 border rounded-md disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-700">{t('common.previous')}</button>
+                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1 border rounded-md disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-700">{t('common.next')}</button>
+                        </div>
+                    </div>}
                 </div>
-                {totalPages > 1 && <div className="flex justify-between items-center mt-4 text-sm">
-                    <p className="text-slate-600 dark:text-slate-400">{t('history.pagination', { currentPage, totalPages, totalRecords: filteredRecords.length })}</p>
-                    <div className="flex gap-2">
-                        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1 border rounded-md disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-700">{t('common.previous')}</button>
-                        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1 border rounded-md disabled:opacity-50 dark:border-slate-600 dark:hover:bg-slate-700">{t('common.next')}</button>
-                    </div>
-                </div>}
             </div>
         </div>
     );

@@ -356,7 +356,7 @@ const QualificationsManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     );
 
     return (
-        <div className="space-y-8">
+        <div className="h-full flex flex-col">
             {isGroupModalOpen && <GroupEditModal 
                 group={editingGroup} 
                 allQualifications={qualifications} 
@@ -366,20 +366,20 @@ const QualificationsManager: React.FC<{ feature: Feature }> = ({ feature }) => {
                 onDeleteQualification={onDeleteQualification}
             />}
             
-            <header>
+            <header className="flex-shrink-0 mb-8">
                 <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
                 <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
             </header>
             
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="flex justify-between items-center mb-4">
+            <div className="flex-1 min-h-0 flex flex-col bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="flex-shrink-0 flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-200">{t('qualificationsManager.title')}</h2>
                      <button onClick={() => { setEditingGroup(null); setIsGroupModalOpen(true); }} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md inline-flex items-center">
                         <PlusIcon className="w-5 h-5 mr-2"/>{t('qualificationsManager.createGroup')}
                     </button>
                 </div>
 
-                 <div className="mb-4">
+                 <div className="flex-shrink-0 mb-4">
                     <input
                         type="text"
                         placeholder={t('qualificationsManager.searchPlaceholder')}
@@ -389,9 +389,9 @@ const QualificationsManager: React.FC<{ feature: Feature }> = ({ feature }) => {
                     />
                 </div>
 
-                 <div className="overflow-x-auto">
+                 <div className="flex-1 min-h-0 overflow-y-auto -mx-6 px-6">
                     <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                        <thead className="bg-slate-50 dark:bg-slate-700">
+                        <thead className="bg-white dark:bg-slate-800 sticky top-0 z-10">
                             <tr>
                                 <SortableHeader sortKey="name" label={t('qualificationsManager.headers.name')} />
                                 <SortableHeader sortKey="qualCount" label={t('qualificationsManager.headers.count')} />

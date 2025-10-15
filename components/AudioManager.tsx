@@ -78,14 +78,14 @@ const AudioManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="h-full flex flex-col">
             {isModalOpen && <AudioFileModal file={editingFile} onSave={handleSave} onClose={() => setIsModalOpen(false)} />}
-            <header>
+            <header className="flex-shrink-0 mb-8">
                 <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
                 <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
             </header>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="flex justify-between items-center mb-4">
+            <div className="flex-1 min-h-0 flex flex-col bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="flex-shrink-0 flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-semibold flex items-center gap-2">
                         <span className="material-symbols-outlined text-3xl text-slate-600 dark:text-slate-400">volume_up</span>
                         {t('audioManager.title')}
@@ -95,9 +95,9 @@ const AudioManager: React.FC<{ feature: Feature }> = ({ feature }) => {
                         {t('audioManager.uploadFile')}
                     </button>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="flex-1 min-h-0 overflow-y-auto -mx-6">
                     <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                        <thead className="bg-slate-50 dark:bg-slate-700">
+                        <thead className="bg-white dark:bg-slate-800 sticky top-0 z-10">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.name')}</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('audioManager.headers.duration')}</th>

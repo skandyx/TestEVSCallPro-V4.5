@@ -203,10 +203,8 @@ const ReportingDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
             }
             return acc;
         }, {});
-// FIX: Explicitly typed `s` to resolve property access errors on `unknown` type.
         const data = Object.values(agentStats).map((s: { name: string; calls: number; successes: number; }) => s.calls > 0 ? (s.successes / s.calls) * 100 : 0);
         return {
-// FIX: Explicitly typed `s` to resolve property access errors on `unknown` type.
             labels: Object.values(agentStats).map((s: { name: string; calls: number; successes: number; }) => s.name),
             datasets: [{ label: t('reporting.charts.successRateLabel'), data, backgroundColor: 'rgba(22, 163, 74, 0.7)' }]
         };
@@ -253,7 +251,6 @@ const ReportingDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
             }
             return acc;
         }, {});
-// FIX: Explicitly typed `stat` to resolve spread operator errors on `unknown` type.
         return Object.values(statsByAgent).map((stat: { agentId: string; calls: number; totalDuration: number; successes: number; }) => ({
             ...stat,
             name: findEntityName(stat.agentId, users),
@@ -291,7 +288,6 @@ const ReportingDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
             acc[siteId].successes += stat.successes;
             return acc;
         }, {});
-// FIX: Explicitly typed `stat` to resolve spread operator errors on `unknown` type.
         return Object.values(statsBySite).map((stat: { id: string, name: string, calls: number, totalDuration: number, successes: number }) => ({
             ...stat,
             avgDuration: stat.calls > 0 ? stat.totalDuration / stat.calls : 0,
@@ -311,7 +307,6 @@ const ReportingDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
             return acc;
         }, {});
 
-// FIX: Explicitly typed `group` to resolve errors when accessing properties on `unknown` type.
         return Object.values(sessionsByAgentDay).map((group: { agentId: string; date: Date; sessions: AgentSession[] }) => {
             const firstLogin = new Date(Math.min(...group.sessions.map(s => new Date(s.loginTime).getTime())));
             const lastLogout = group.sessions.every(s => s.logoutTime) ? new Date(Math.max(...group.sessions.map(s => new Date(s.logoutTime!).getTime()))) : null;
@@ -452,42 +447,44 @@ const ReportingDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
     };
 
     return (
-        <div className="space-y-6">
-            <header className="flex justify-between items-start">
-                <div>
-                    <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
-                    <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
-                </div>
-                <button onClick={handleExportPdf} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md">{t('reporting.exportPdf')}</button>
-            </header>
+        <div className="h-full flex flex-col">
+            <div className="flex-shrink-0 space-y-6">
+                <header className="flex justify-between items-start">
+                    <div>
+                        <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
+                        <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
+                    </div>
+                    <button onClick={handleExportPdf} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md">{t('reporting.exportPdf')}</button>
+                </header>
 
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <select value={filters.dateRange} onChange={handleDateRangeChange} className="p-2 border bg-white rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"><option value="last7days">{t('reporting.filters.dateRanges.last7days')}</option><option value="last30days">{t('reporting.filters.dateRanges.last30days')}</option><option value="thisMonth">{t('reporting.filters.dateRanges.thisMonth')}</option></select>
-                    <input type="date" value={filters.startDate} onChange={e => { setFilters(f => ({ ...f, startDate: e.target.value, dateRange: '' })); setHistoryPage(1); }} className="p-2 border rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"/>
-                    <input type="date" value={filters.endDate} onChange={e => { setFilters(f => ({ ...f, endDate: e.target.value, dateRange: '' })); setHistoryPage(1); }} className="p-2 border rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"/>
-                    <select value={filters.campaignId} onChange={e => { setFilters(f => ({ ...f, campaignId: e.target.value })); setHistoryPage(1); }} className="p-2 border bg-white rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"><option value="all">{t('reporting.filters.allCampaigns')}</option>{campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
-                    <select value={filters.agentId} onChange={e => { setFilters(f => ({ ...f, agentId: e.target.value })); setHistoryPage(1); }} className="p-2 border bg-white rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"><option value="all">{t('reporting.filters.allAgents')}</option>{users.filter(u=>u.role==='Agent').map(u => <option key={u.id} value={u.id}>{u.firstName} {u.lastName}</option>)}</select>
+                <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <select value={filters.dateRange} onChange={handleDateRangeChange} className="p-2 border bg-white rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"><option value="last7days">{t('reporting.filters.dateRanges.last7days')}</option><option value="last30days">{t('reporting.filters.dateRanges.last30days')}</option><option value="thisMonth">{t('reporting.filters.dateRanges.thisMonth')}</option></select>
+                        <input type="date" value={filters.startDate} onChange={e => { setFilters(f => ({ ...f, startDate: e.target.value, dateRange: '' })); setHistoryPage(1); }} className="p-2 border rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"/>
+                        <input type="date" value={filters.endDate} onChange={e => { setFilters(f => ({ ...f, endDate: e.target.value, dateRange: '' })); setHistoryPage(1); }} className="p-2 border rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"/>
+                        <select value={filters.campaignId} onChange={e => { setFilters(f => ({ ...f, campaignId: e.target.value })); setHistoryPage(1); }} className="p-2 border bg-white rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"><option value="all">{t('reporting.filters.allCampaigns')}</option>{campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
+                        <select value={filters.agentId} onChange={e => { setFilters(f => ({ ...f, agentId: e.target.value })); setHistoryPage(1); }} className="p-2 border bg-white rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"><option value="all">{t('reporting.filters.allAgents')}</option>{users.filter(u=>u.role==='Agent').map(u => <option key={u.id} value={u.id}>{u.firstName} {u.lastName}</option>)}</select>
+                    </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <KpiCard title={t('reporting.kpis.processedCalls')} value={kpis.processedCalls} />
+                    <KpiCard title={t('reporting.kpis.totalTalkTime')} value={kpis.totalTalkTime} />
+                    <KpiCard title={t('reporting.kpis.avgCallDuration')} value={kpis.avgCallDuration} />
+                    <KpiCard title={t('reporting.kpis.successRate')} value={kpis.successRate} />
+                    <KpiCard title={t('reporting.kpis.occupancyRate')} value={kpis.occupancyRate} />
                 </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                <KpiCard title={t('reporting.kpis.processedCalls')} value={kpis.processedCalls} />
-                <KpiCard title={t('reporting.kpis.totalTalkTime')} value={kpis.totalTalkTime} />
-                <KpiCard title={t('reporting.kpis.avgCallDuration')} value={kpis.avgCallDuration} />
-                <KpiCard title={t('reporting.kpis.successRate')} value={kpis.successRate} />
-                <KpiCard title={t('reporting.kpis.occupancyRate')} value={kpis.occupancyRate} />
-            </div>
 
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="border-b border-slate-200 dark:border-slate-700">
+            <div className="mt-6 flex-1 min-h-0 flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="flex-shrink-0 border-b border-slate-200 dark:border-slate-700">
                     <nav className="-mb-px flex space-x-4 px-6">
                         {['charts', 'timesheet', 'campaign', 'agent', 'group', 'site', 'history'].map(tab => (
                             <button key={tab} onClick={() => setActiveTab(tab)} className={`py-3 px-1 border-b-2 font-medium text-sm ${activeTab === tab ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}>{t(`reporting.tabs.${tab}`)}</button>
                         ))}
                     </nav>
                 </div>
-                <div className="p-6">
+                <div className="flex-1 min-h-0 overflow-y-auto p-6">
                     {activeTab === 'charts' && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8" style={{ minHeight: '600px' }}>
                             <div id="chart-parent-1" className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg"><h3 className="font-semibold mb-2 dark:text-slate-200">{t('reporting.charts.callsByCampaignTitle')}</h3><div className="h-64"><ChartComponent id="treemapChart" type="treemap" data={callsByCampaignData} options={{...commonChartOptions, plugins: {legend: {display: false}}}} /></div></div>

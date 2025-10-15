@@ -13,7 +13,6 @@ const formatDuration = (milliseconds: number) => {
     return `${h}h ${m}m ${s}s`;
 };
 
-// FIX: Made the function more robust by handling `undefined` and all `AgentStatus` types to prevent type errors.
 const getStatusLedColor = (status: AgentStatus | undefined): string => {
     if (!status) return 'bg-gray-400';
     switch (status) {
@@ -95,13 +94,13 @@ const SessionViewer: React.FC<{ feature: Feature }> = ({ feature }) => {
     };
 
     return (
-        <div className="space-y-8">
-            <header>
+        <div className="h-full flex flex-col">
+            <header className="flex-shrink-0 mb-8">
                 <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
                 <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
             </header>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-md border dark:border-slate-700">
+            <div className="flex-1 min-h-0 flex flex-col bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="flex-shrink-0 grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-md border dark:border-slate-700">
                     <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">{t('sessionViewer.filters.startDate')}</label>
                         <input type="date" name="startDate" value={filters.startDate} onChange={handleFilterChange} className="mt-1 w-full p-2 border rounded-md dark:bg-slate-900 dark:border-slate-600"/>
@@ -126,9 +125,9 @@ const SessionViewer: React.FC<{ feature: Feature }> = ({ feature }) => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="flex-1 min-h-0 overflow-y-auto">
                     <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                        <thead className="bg-slate-50 dark:bg-slate-700">
+                        <thead className="bg-white dark:bg-slate-800 sticky top-0 z-10">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('sessionViewer.headers.agent')}</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('sessionViewer.headers.loginTime')}</th>
@@ -168,14 +167,14 @@ const SessionViewer: React.FC<{ feature: Feature }> = ({ feature }) => {
                     {filteredRecords.length === 0 && (
                         <p className="text-center text-slate-500 py-8">{t('sessionViewer.noSessions')}</p>
                     )}
+                    {totalPages > 1 && <div className="flex justify-between items-center mt-4 text-sm">
+                        <p className="text-slate-600 dark:text-slate-400">{t('history.pagination', { currentPage, totalPages, totalRecords: filteredRecords.length })}</p>
+                        <div className="flex gap-2">
+                            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 disabled:opacity-50"><ArrowLeftIcon className="w-5 h-5"/></button>
+                            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-2 disabled:opacity-50"><ArrowRightIcon className="w-5 h-5"/></button>
+                        </div>
+                    </div>}
                 </div>
-                 {totalPages > 1 && <div className="flex justify-between items-center mt-4 text-sm">
-                    <p className="text-slate-600 dark:text-slate-400">{t('history.pagination', { currentPage, totalPages, totalRecords: filteredRecords.length })}</p>
-                    <div className="flex gap-2">
-                        <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-2 disabled:opacity-50"><ArrowLeftIcon className="w-5 h-5"/></button>
-                        <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-2 disabled:opacity-50"><ArrowRightIcon className="w-5 h-5"/></button>
-                    </div>
-                </div>}
             </div>
         </div>
     );
