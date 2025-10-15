@@ -1,6 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { Contact, CallHistoryRecord, User, Qualification, ContactNote } from '../types.ts';
+// FIX: Replaced ClockIcon with TimeIcon as ClockIcon is not an exported member.
 import { XMarkIcon, PhoneIcon, ChartBarIcon, TimeIcon, UsersIcon } from './Icons.tsx';
+import apiClient from '../src/lib/axios.ts';
 import { useI18n } from '../src/i18n/index.tsx';
 
 interface ContactHistoryModalProps {
@@ -9,8 +11,6 @@ interface ContactHistoryModalProps {
     contact: Contact;
     users: User[];
     qualifications: Qualification[];
-    callHistory: CallHistoryRecord[];
-    contactNotes: ContactNote[];
 }
 
 const findEntityName = (id: string | null, collection: Array<{id: string, name?: string, firstName?: string, lastName?: string, description?: string}>): string => {
@@ -44,34 +44,46 @@ const KpiCard: React.FC<{ title: string, value: string | number, icon: React.FC<
     </div>
 );
 
-const ContactHistoryModal: React.FC<ContactHistoryModalProps> = ({ isOpen, onClose, contact, users, qualifications, callHistory, contactNotes }) => {
+const ContactHistoryModal: React.FC<ContactHistoryModalProps> = ({ isOpen, onClose, contact, users, qualifications }) => {
     const { t } = useI18n();
+    const [history, setHistory] = useState<{ calls: CallHistoryRecord[], notes: ContactNote[] }>({ calls: [], notes: [] });
+    const [isLoading, setIsLoading] = useState(true);
 
-    const contactScopedData = useMemo(() => {
-        if (!contact) return { calls: [], notes: [] };
-        return {
-            calls: callHistory.filter(c => c.contactId === contact.id),
-            notes: contactNotes.filter(n => n.contactId === contact.id),
-        };
-    }, [contact, callHistory, contactNotes]);
+    useEffect(() => {
+        if (isOpen && contact) {
+            setIsLoading(true);
+            apiClient.get(`/contacts/${contact.id}/history`)
+                .then(response => {
+                    // FIX: The value for the 'notes' property was missing, causing a syntax error.
+                    // This has been corrected by assigning the appropriate data from the response.
+                    setHistory({
+                        calls: response.data.callHistory || [],
+                        notes: response.data.contactNotes || []
+                    });
+                })
+                .catch(err => console.error("Failed to load contact history", err))
+                .finally(() => setIsLoading(false));
+        }
+    }, [isOpen, contact]);
 
     const timelineItems = useMemo(() => {
-        const calls = contactScopedData.calls.map(c => ({ ...c, type: 'call' as const, date: new Date(c.startTime) }));
-        const notes = contactScopedData.notes.map(n => ({ ...n, type: 'note' as const, date: new Date(n.createdAt) }));
+        const calls = history.calls.map(c => ({ ...c, type: 'call' as const, date: new Date(c.startTime) }));
+        const notes = history.notes.map(n => ({ ...n, type: 'note' as const, date: new Date(n.createdAt) }));
         
         return [...calls, ...notes].sort((a, b) => b.date.getTime() - a.date.getTime());
-    }, [contactScopedData]);
+    }, [history]);
     
     const kpis = useMemo(() => {
-        const totalCalls = contactScopedData.calls.length;
-        const totalTalkTime = contactScopedData.calls.reduce((sum, call) => sum + call.duration, 0);
-        const uniqueAgents = new Set(contactScopedData.calls.map(c => c.agentId)).size;
-        const positiveQuals = contactScopedData.calls.filter(c => {
+        const totalCalls = history.calls.length;
+        const totalTalkTime = history.calls.reduce((sum, call) => sum + call.duration, 0);
+        const uniqueAgents = new Set(history.calls.map(c => c.agentId)).size;
+        const positiveQuals = history.calls.filter(c => {
             const qual = qualifications.find(q => q.id === c.qualificationId);
             return qual?.type === 'positive';
         }).length;
         return { totalCalls, totalTalkTime, uniqueAgents, positiveQuals };
-    }, [contactScopedData.calls, qualifications]);
+    }, [history.calls, qualifications]);
+
 
     if (!isOpen) return null;
     
@@ -87,37 +99,41 @@ const ContactHistoryModal: React.FC<ContactHistoryModalProps> = ({ isOpen, onClo
                         <XMarkIcon className="w-6 h-6 text-slate-500" />
                     </button>
                 </div>
-                <div className="flex-1 grid grid-cols-12 gap-6 p-6 overflow-hidden">
-                    <div className="col-span-4 space-y-4">
-                        <KpiCard title={t('contactHistory.kpis.totalCalls')} value={kpis.totalCalls} icon={PhoneIcon} />
-                        <KpiCard title={t('contactHistory.kpis.talkTime')} value={formatDuration(kpis.totalTalkTime)} icon={TimeIcon} />
-                        <KpiCard title={t('contactHistory.kpis.uniqueAgents')} value={kpis.uniqueAgents} icon={UsersIcon} />
-                        <KpiCard title={t('contactHistory.kpis.positiveQuals')} value={kpis.positiveQuals} icon={ChartBarIcon} />
-                    </div>
-                    <div className="col-span-8 flex flex-col">
-                         <h4 className="text-md font-semibold text-slate-800 dark:text-slate-200 mb-2">{t('contactHistory.timelineTitle')}</h4>
-                         <div className="flex-1 overflow-y-auto pr-2 space-y-4">
-                            {timelineItems.length > 0 ? timelineItems.map((item, index) => (
-                                 <div key={`${item.type}-${item.id}-${index}`} className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border dark:border-slate-700 text-sm">
-                                     <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 mb-2">
-                                         <span className="font-semibold">{item.type === 'call' ? t('contactHistory.callBy', { agentName: findEntityName(item.agentId, users) }) : t('contactHistory.noteBy', { agentName: findEntityName(item.agentId, users) })}</span>
-                                         <span>{item.date.toLocaleString('fr-FR')}</span>
+                {isLoading ? (
+                    <div className="flex-1 flex items-center justify-center text-slate-500">{t('contactHistory.loading')}</div>
+                ) : (
+                    <div className="flex-1 grid grid-cols-12 gap-6 p-6 overflow-hidden">
+                        <div className="col-span-4 space-y-4">
+                            <KpiCard title={t('contactHistory.kpis.totalCalls')} value={kpis.totalCalls} icon={PhoneIcon} />
+                            <KpiCard title={t('contactHistory.kpis.talkTime')} value={formatDuration(kpis.totalTalkTime)} icon={TimeIcon} />
+                            <KpiCard title={t('contactHistory.kpis.uniqueAgents')} value={kpis.uniqueAgents} icon={UsersIcon} />
+                            <KpiCard title={t('contactHistory.kpis.positiveQuals')} value={kpis.positiveQuals} icon={ChartBarIcon} />
+                        </div>
+                        <div className="col-span-8 flex flex-col">
+                             <h4 className="text-md font-semibold text-slate-800 dark:text-slate-200 mb-2">{t('contactHistory.timelineTitle')}</h4>
+                             <div className="flex-1 overflow-y-auto pr-2 space-y-4">
+                                {timelineItems.length > 0 ? timelineItems.map((item, index) => (
+                                     <div key={`${item.type}-${item.id}-${index}`} className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border dark:border-slate-700 text-sm">
+                                         <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 mb-2">
+                                             <span className="font-semibold">{item.type === 'call' ? t('contactHistory.callBy', { agentName: findEntityName(item.agentId, users) }) : t('contactHistory.noteBy', { agentName: findEntityName(item.agentId, users) })}</span>
+                                             <span>{item.date.toLocaleString('fr-FR')}</span>
+                                         </div>
+                                        {item.type === 'call' ? (
+                                            <div className="space-y-1">
+                                                <p><span className="font-semibold">{t('contactHistory.duration')}</span> {formatDuration(item.duration)}</p>
+                                                <p><span className="font-semibold">{t('contactHistory.qualification')}</span> {findEntityName(item.qualificationId, qualifications)}</p>
+                                            </div>
+                                        ) : (
+                                            <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{item.note}</p>
+                                        )}
                                      </div>
-                                    {item.type === 'call' ? (
-                                        <div className="space-y-1">
-                                            <p><span className="font-semibold">{t('contactHistory.duration')}</span> {formatDuration(item.duration)}</p>
-                                            <p><span className="font-semibold">{t('contactHistory.qualification')}</span> {findEntityName(item.qualificationId, qualifications)}</p>
-                                        </div>
-                                    ) : (
-                                        <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{item.note}</p>
-                                    )}
-                                 </div>
-                            )) : (
-                                <p className="text-center italic text-slate-400 pt-16">{t('contactHistory.noHistory')}</p>
-                            )}
-                         </div>
+                                )) : (
+                                    <p className="text-center italic text-slate-400 pt-16">{t('contactHistory.noHistory')}</p>
+                                )}
+                             </div>
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

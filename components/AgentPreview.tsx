@@ -161,9 +161,8 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
         color: block.textColor,
         fontFamily: block.fontFamily,
         fontSize: block.fontSize ? `${block.fontSize}px` : undefined,
-        border: '1px solid #e2e8f0'
       },
-      className: "p-3 rounded-md h-full flex flex-col justify-center"
+      className: "p-3 rounded-md h-full flex flex-col justify-center border border-slate-200 dark:border-slate-700 dark:bg-slate-800/20"
     };
 
     const commonInputStyles = {
@@ -176,11 +175,10 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
     const isExistingContact = contact && contact.id && !contact.id.startsWith('contact-import-') && !contact.id.startsWith('new-manual-insert-');
 
     switch (block.type) {
-        // FIX: Removed hardcoded `text-lg` class to respect the dynamic `fontSize` property for true WYSIWYG between editor and preview.
         case 'label':
-            return <div {...commonContainerProps}><p className="font-bold whitespace-pre-wrap break-words">{block.content.text}</p></div>;
+            return <div {...commonContainerProps} style={{...commonContainerProps.style, textAlign: block.textAlign}}><p className="font-bold whitespace-pre-wrap break-words">{block.content.text}</p></div>;
         case 'text':
-            return <div {...commonContainerProps}><p className="whitespace-pre-wrap break-words">{block.content.text}</p></div>;
+            return <div {...commonContainerProps} style={{...commonContainerProps.style, textAlign: block.textAlign}}><p className="whitespace-pre-wrap break-words">{block.content.text}</p></div>;
         case 'input':
             return (
                 <div {...commonContainerProps}>
@@ -188,8 +186,8 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
                     <input
                         type={block.content.format || 'text'}
                         placeholder={block.content.placeholder}
-                        style={commonInputStyles}
-                        className="w-full p-2 border rounded-md border-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                        style={{...commonInputStyles, textAlign: block.textAlign}}
+                        className="w-full p-2 border rounded-md border-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed dark:bg-slate-700 dark:border-slate-600 dark:disabled:bg-slate-800 dark:text-slate-200"
                         value={formValues[block.fieldName] || ''}
                         onChange={e => handleValueChange(block.fieldName, e.target.value)}
                         disabled={block.readOnly}
@@ -199,15 +197,15 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
         case 'textarea':
              const textareaContainerProps = {
                  ...commonContainerProps,
-                 className: "p-3 rounded-md h-full flex flex-col" // No justify-center
+                 className: "p-3 rounded-md h-full flex flex-col border border-slate-200 dark:border-slate-700 dark:bg-slate-800/20" // No justify-center
              };
              return (
                 <div {...textareaContainerProps}>
                     <label className="block font-semibold mb-1 flex-shrink-0">{block.name}</label>
                     <textarea
                         placeholder={block.content.placeholder}
-                        style={commonInputStyles}
-                        className="w-full p-2 border rounded-md border-slate-300 flex-1 resize-none disabled:bg-slate-100 disabled:cursor-not-allowed"
+                        style={{...commonInputStyles, textAlign: block.textAlign}}
+                        className="w-full p-2 border rounded-md border-slate-300 flex-1 resize-none disabled:bg-slate-100 disabled:cursor-not-allowed dark:bg-slate-700 dark:border-slate-600 dark:disabled:bg-slate-800 dark:text-slate-200"
                         value={formValues[block.fieldName] || ''}
                         onChange={e => handleValueChange(block.fieldName, e.target.value)}
                         disabled={block.readOnly}
@@ -221,27 +219,27 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
             };
             return (
                 <div {...commonContainerProps}>
-                    <h4 className="font-semibold mb-2 border-b pb-1 text-slate-700 flex-shrink-0">{t('agentPreview.notesHistory')}</h4>
+                    <h4 className="font-semibold mb-2 border-b pb-1 text-slate-700 dark:text-slate-300 flex-shrink-0">{t('agentPreview.notesHistory')}</h4>
                     <div className="space-y-3 overflow-y-auto text-xs flex-1 pr-1">
                         {contactNotes.length > 0 ? [...contactNotes].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((note) => (
-                             <div key={note.id} className="p-2 rounded bg-slate-50">
-                                 <div className="flex justify-between items-baseline text-slate-500 mb-1">
+                             <div key={note.id} className="p-2 rounded bg-slate-100 dark:bg-slate-700">
+                                 <div className="flex justify-between items-baseline text-slate-500 dark:text-slate-400 mb-1">
                                      <span className="font-semibold">{findAgentLogin(note.agentId)}</span>
                                      <span>{new Date(note.createdAt).toLocaleString('fr-FR')}</span>
                                  </div>
-                                 <p className="text-slate-800 whitespace-pre-wrap">{note.note}</p>
+                                 <p className="text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{note.note}</p>
                              </div>
                         )) : <p className="text-center italic text-slate-400 pt-4">{t('agentPreview.noNotes')}</p>}
                     </div>
-                    <div className="mt-2 pt-2 border-t flex-shrink-0">
+                    <div className="mt-2 pt-2 border-t dark:border-slate-600 flex-shrink-0">
                         <textarea
                             placeholder={t('agentPreview.addNotePlaceholder')}
-                            className="w-full p-2 border rounded-md text-sm"
+                            className="w-full p-2 border rounded-md text-sm dark:bg-slate-700 dark:border-slate-600"
                             rows={3}
                             value={newNote}
                             onChange={e => setNewNote(e.target.value)}
                         />
-                        <button onClick={onSaveNote} className="mt-2 w-full text-sm bg-indigo-100 text-indigo-700 font-semibold py-1.5 px-3 rounded-md hover:bg-indigo-200 disabled:opacity-50" disabled={!newNote.trim()}>
+                        <button onClick={onSaveNote} className="mt-2 w-full text-sm bg-indigo-100 text-indigo-700 font-semibold py-1.5 px-3 rounded-md hover:bg-indigo-200 disabled:opacity-50 dark:bg-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-900">
                             {t('agentPreview.saveNote')}
                         </button>
                     </div>
@@ -253,7 +251,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
                     <p className="font-semibold mb-2">{block.content.question}</p>
                     <div className="space-y-1">
                         {block.content.options.map((opt: string) => (
-                            <label key={opt} className={`flex items-center ${block.readOnly ? 'cursor-not-allowed text-slate-400' : ''}`}>
+                            <label key={opt} className={`flex items-center ${block.readOnly ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : ''}`}>
                                 <input type="radio" name={block.fieldName} value={opt} checked={formValues[block.fieldName] === opt} onChange={e => handleValueChange(block.fieldName, e.target.value)} className="mr-2" disabled={block.readOnly} />
                                 {opt}
                             </label>
@@ -267,7 +265,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
                     <p className="font-semibold mb-2">{block.content.question}</p>
                     <div className="space-y-1">
                         {block.content.options.map((opt: string) => (
-                            <label key={opt} className={`flex items-center ${block.readOnly ? 'cursor-not-allowed text-slate-400' : ''}`}>
+                            <label key={opt} className={`flex items-center ${block.readOnly ? 'cursor-not-allowed text-slate-400 dark:text-slate-500' : ''}`}>
                                 <input type="checkbox" name={`${block.fieldName}-${opt}`} value={opt} checked={Array.isArray(formValues[block.fieldName]) && formValues[block.fieldName].includes(opt)} onChange={e => handleCheckboxChange(block.fieldName, opt, e.target.checked)} className="mr-2" disabled={block.readOnly} />
                                 {opt}
                             </label>
@@ -281,7 +279,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
                     <label className="block font-semibold mb-1">{block.name}</label>
                     <select
                         style={commonInputStyles}
-                        className="w-full p-2 border rounded-md border-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                        className="w-full p-2 border rounded-md border-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed bg-white dark:bg-slate-700 dark:border-slate-600 dark:disabled:bg-slate-800 dark:text-slate-200"
                         value={formValues[block.fieldName] || ''}
                         onChange={e => handleValueChange(block.fieldName, e.target.value)}
                         disabled={block.readOnly}
@@ -298,7 +296,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
                     <input
                         type="date"
                         style={commonInputStyles}
-                        className="w-full p-2 border rounded-md border-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                        className="w-full p-2 border rounded-md border-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed dark:bg-slate-700 dark:border-slate-600 dark:disabled:bg-slate-800 dark:text-slate-200"
                         value={formValues[block.fieldName] || ''}
                         onChange={e => handleValueChange(block.fieldName, e.target.value)}
                         disabled={block.readOnly}
@@ -312,8 +310,8 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
                     <input
                         type="tel"
                         placeholder={block.content.placeholder}
-                        style={commonInputStyles}
-                        className="w-full p-2 border rounded-md border-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                        style={{...commonInputStyles, textAlign: block.textAlign}}
+                        className="w-full p-2 border rounded-md border-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed dark:bg-slate-700 dark:border-slate-600 dark:disabled:bg-slate-800 dark:text-slate-200"
                         value={formValues[block.fieldName] || ''}
                         onChange={e => handleValueChange(block.fieldName, e.target.value)}
                         disabled={block.readOnly || (isExistingContact && block.fieldName === 'phone_number')}
@@ -322,7 +320,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
             );
         case 'web-view':
             return (
-                <div {...commonContainerProps} className="p-0 rounded-md h-full flex flex-col overflow-hidden">
+                <div {...commonContainerProps} className="p-0 rounded-md h-full flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700">
                     <iframe src={block.content.url} className="w-full h-full border-0" title={block.name}></iframe>
                 </div>
             );
@@ -333,8 +331,8 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
                     <input
                         type="email"
                         placeholder={block.content.placeholder}
-                        style={commonInputStyles}
-                        className="w-full p-2 border rounded-md border-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                        style={{...commonInputStyles, textAlign: block.textAlign}}
+                        className="w-full p-2 border rounded-md border-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed dark:bg-slate-700 dark:border-slate-600 dark:disabled:bg-slate-800 dark:text-slate-200"
                         value={formValues[block.fieldName] || ''}
                         onChange={e => handleValueChange(block.fieldName, e.target.value)}
                         disabled={block.readOnly}
@@ -348,7 +346,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
                     <input
                         type="time"
                         style={commonInputStyles}
-                        className="w-full p-2 border rounded-md border-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                        className="w-full p-2 border rounded-md border-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed dark:bg-slate-700 dark:border-slate-600 dark:disabled:bg-slate-800 dark:text-slate-200"
                         value={formValues[block.fieldName] || ''}
                         onChange={e => handleValueChange(block.fieldName, e.target.value)}
                         disabled={block.readOnly}
@@ -357,10 +355,10 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
             );
         case 'button':
             return (
-                <div {...commonContainerProps} className="p-2 rounded-md h-full flex flex-col justify-center">
+                <div {...commonContainerProps} className="p-2 rounded-md h-full flex flex-col justify-center border border-slate-200 dark:border-slate-700">
                     <button
                         style={commonInputStyles}
-                        className="w-full p-2 border rounded-md font-semibold hover:opacity-80 transition-opacity"
+                        className="w-full p-2 border rounded-md font-semibold hover:opacity-80 transition-opacity dark:border-slate-600"
                         onClick={() => handleButtonClick(block.content.action)}
                     >
                         {block.content.text}
@@ -369,10 +367,10 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
             );
         case 'image':
             return (
-                <div {...commonContainerProps} className="p-0 overflow-hidden">
-                    {block.content.src
+                <div {...commonContainerProps} className="p-0 overflow-hidden border border-slate-200 dark:border-slate-700">
+                    {block.content.src 
                         ? <img src={block.content.src} alt={block.name} className="w-full h-full object-contain" />
-                        : <div className="h-full w-full flex flex-col items-center justify-center bg-slate-100 text-slate-400"><span className="material-symbols-outlined text-4xl">image</span><span className="text-xs mt-1">Image</span></div>
+                        : <div className="h-full w-full flex flex-col items-center justify-center bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500"><span className="material-symbols-outlined text-4xl">image</span><span className="text-xs mt-1">Image</span></div>
                     }
                 </div>
             );
@@ -405,7 +403,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
 
   const ScriptCanvas = (
     <div 
-      className="rounded-lg p-4 relative"
+      className="rounded-lg p-4 relative dark:brightness-75"
       style={{ 
         backgroundColor: script.backgroundColor,
         height: canvasHeight
@@ -450,7 +448,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
             
             <div className="w-1/4"></div>
         </header>
-        <div className="flex-1 overflow-y-auto p-2 bg-slate-50">
+        <div className="flex-1 overflow-y-auto p-2 bg-slate-50 dark:bg-slate-900">
           {ScriptCanvas}
         </div>
       </div>

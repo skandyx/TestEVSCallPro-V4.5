@@ -361,7 +361,6 @@ const OutboundCampaignsManager: React.FC<{ feature: Feature }> = ({ feature }) =
         userGroups = [], 
         qualifications = [], 
         contactNotes = [],
-        callHistory = [],
         currentUser,
         saveOrUpdate,
         delete: deleteCampaign,
@@ -376,7 +375,6 @@ const OutboundCampaignsManager: React.FC<{ feature: Feature }> = ({ feature }) =
         userGroups: state.userGroups,
         qualifications: state.qualifications,
         contactNotes: state.contactNotes,
-        callHistory: state.callHistory,
         currentUser: state.currentUser!,
         saveOrUpdate: state.saveOrUpdate,
         delete: state.delete,
@@ -486,7 +484,6 @@ const OutboundCampaignsManager: React.FC<{ feature: Feature }> = ({ feature }) =
                 savedScripts={savedScripts}
                 users={users}
                 contactNotes={contactNotes}
-                callHistory={callHistory}
                 userGroups={userGroups}
                 currentUser={currentUser}
             />

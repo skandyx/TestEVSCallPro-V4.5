@@ -8,7 +8,7 @@ declare var Papa: any;
 
 interface ContactsTabProps {
     campaign: Campaign;
-    callHistory: CallHistoryRecord[];
+    campaignCallHistory: CallHistoryRecord[];
     contactNotes: ContactNote[];
     qualifications: Qualification[];
     users: User[];
@@ -26,7 +26,7 @@ const formatDuration = (seconds: number) => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
 
-const ContactsTab: React.FC<ContactsTabProps> = ({ campaign, callHistory, contactNotes, qualifications, users, script, onDeleteContacts, currentUser }) => {
+const ContactsTab: React.FC<ContactsTabProps> = ({ campaign, campaignCallHistory, contactNotes, qualifications, users, script, onDeleteContacts, currentUser }) => {
     const { t } = useI18n();
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -35,10 +35,6 @@ const ContactsTab: React.FC<ContactsTabProps> = ({ campaign, callHistory, contac
     const [historyModal, setHistoryModal] = useState<{ isOpen: boolean, contact: Contact | null }>({ isOpen: false, contact: null });
 
     const canDelete = currentUser.role === 'Administrateur' || currentUser.role === 'SuperAdmin';
-
-    const campaignCallHistory = useMemo(() => {
-        return callHistory.filter(c => c.campaignId === campaign.id);
-    }, [callHistory, campaign.id]);
 
     const handleExport = () => {
         const callsByContact = campaignCallHistory.reduce((acc, call) => {
@@ -175,15 +171,7 @@ const ContactsTab: React.FC<ContactsTabProps> = ({ campaign, callHistory, contac
     return (
         <div>
             {historyModal.isOpen && historyModal.contact && (
-                <ContactHistoryModal 
-                    isOpen={true} 
-                    onClose={() => setHistoryModal({ isOpen: false, contact: null })} 
-                    contact={historyModal.contact} 
-                    users={users} 
-                    qualifications={qualifications}
-                    callHistory={callHistory}
-                    contactNotes={contactNotes}
-                />
+                <ContactHistoryModal isOpen={true} onClose={() => setHistoryModal({ isOpen: false, contact: null })} contact={historyModal.contact} users={users} qualifications={qualifications} />
             )}
             <div className="flex justify-between items-center mb-4">
                 <input type="search" placeholder={t('campaignDetail.contacts.searchPlaceholder')} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full max-w-sm p-2 border border-slate-300 rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"/>

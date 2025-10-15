@@ -50,11 +50,6 @@ const ChartComponent: React.FC<{ id: string; type: any; data: any; options: any;
     return <canvas ref={canvasRef} id={id}></canvas>;
 };
 
-// FIX: Define type aliases for complex data shapes to aid TypeScript inference.
-type SiteStat = { id: string, name: string, calls: number, totalDuration: number, successes: number };
-type GroupStat = { id: string; name: string; calls: number; totalDuration: number; avgDuration: number; successRate: number; };
-type TimesheetItem = { agentId: string; agentName: string; date: Date; firstLogin: Date; lastLogout: Date | null; totalDuration: number; adherence: string; };
-
 const ReportingDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
     const { t } = useI18n();
     const { callHistory, users, campaigns, qualifications, agentSessions, userGroups, sites } = useStore(state => ({
@@ -285,7 +280,7 @@ const ReportingDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
 
     const sitePerfData = useMemo(() => {
         const agentSiteMap = new Map(users.map(u => [u.id, u.siteId]));
-        const statsBySite = agentPerfDataCalls.reduce<Record<string, SiteStat>>((acc, stat) => {
+        const statsBySite = agentPerfDataCalls.reduce<Record<string, { id: string, name: string, calls: number, totalDuration: number, successes: number }>>((acc, stat) => {
             const siteId = agentSiteMap.get(stat.agentId) || 'no-site';
             if (!acc[siteId]) acc[siteId] = { id: siteId, name: findEntityName(siteId, sites) || t('supervision.siteBoard.noSite'), calls: 0, totalDuration: 0, successes: 0 };
             acc[siteId].calls += stat.calls;
@@ -293,8 +288,7 @@ const ReportingDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
             acc[siteId].successes += stat.successes;
             return acc;
         }, {});
-        // FIX: Explicitly type the 'stat' parameter to resolve errors related to spreading an 'unknown' type.
-        return Object.values(statsBySite).map((stat: SiteStat) => ({
+        return Object.values(statsBySite).map((stat: { id: string, name: string, calls: number, totalDuration: number, successes: number }) => ({
             ...stat,
             avgDuration: stat.calls > 0 ? stat.totalDuration / stat.calls : 0,
             successRate: stat.calls > 0 ? (stat.successes / stat.calls) * 100 : 0,
@@ -433,21 +427,20 @@ const ReportingDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
             [[t('reporting.tables.agentPerf.headers.agent'), t('reporting.tables.agentPerf.headers.calls'), t('reporting.tables.agentPerf.headers.totalDuration'), t('reporting.tables.agentPerf.headers.avgDuration'), t('reporting.tables.agentPerf.headers.successRate')]],
             agentPerfDataCalls.map(a => [a.name, a.calls, formatDuration(a.totalDuration), formatDuration(a.avgDuration), `${a.successRate.toFixed(1)}%`])
         );
-        // FIX: Explicitly type the parameters in map callbacks to resolve type inference errors.
          addTableToPdf(
             t('reporting.tables.groupPerf.title'),
             [[t('reporting.tables.groupPerf.headers.group'), t('reporting.tables.agentPerf.headers.calls'), t('reporting.tables.agentPerf.headers.totalDuration'), t('reporting.tables.agentPerf.headers.avgDuration'), t('reporting.tables.agentPerf.headers.successRate')]],
-            groupPerfData.map((g: GroupStat) => [g.name, g.calls, formatDuration(g.totalDuration), formatDuration(g.avgDuration), `${g.successRate.toFixed(1)}%`])
+            groupPerfData.map(g => [g.name, g.calls, formatDuration(g.totalDuration), formatDuration(g.avgDuration), `${g.successRate.toFixed(1)}%`])
         );
         addTableToPdf(
             t('reporting.tables.sitePerf.title'),
             [[t('reporting.tables.sitePerf.headers.site'), t('reporting.tables.agentPerf.headers.calls'), t('reporting.tables.agentPerf.headers.totalDuration'), t('reporting.tables.agentPerf.headers.avgDuration'), t('reporting.tables.agentPerf.headers.successRate')]],
-            sitePerfData.map((s: any) => [s.name, s.calls, formatDuration(s.totalDuration), formatDuration(s.avgDuration), `${s.successRate.toFixed(1)}%`])
+            sitePerfData.map(s => [s.name, s.calls, formatDuration(s.totalDuration), formatDuration(s.avgDuration), `${s.successRate.toFixed(1)}%`])
         );
         addTableToPdf(
             t('reporting.tables.timesheet.title'),
             [[t('reporting.tables.timesheet.headers.date'), t('reporting.tables.timesheet.headers.agent'), t('reporting.tables.timesheet.headers.firstLogin'), t('reporting.tables.timesheet.headers.lastLogout'), t('reporting.tables.timesheet.headers.totalDuration')]],
-            timesheetData.slice(0, 50).map((t: TimesheetItem) => [t.date.toLocaleDateString(), t.agentName, t.firstLogin.toLocaleTimeString(), t.lastLogout ? t.lastLogout.toLocaleTimeString() : 'N/A', formatDuration(t.totalDuration)])
+            timesheetData.slice(0, 50).map(t => [t.date.toLocaleDateString(), t.agentName, t.firstLogin.toLocaleTimeString(), t.lastLogout ? t.lastLogout.toLocaleTimeString() : 'N/A', formatDuration(t.totalDuration)])
         );
         
         doc.save(`rapport_${filters.startDate}_${filters.endDate}.pdf`);

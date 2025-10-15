@@ -49,8 +49,7 @@ const SessionViewer: React.FC<{ feature: Feature }> = ({ feature }) => {
     });
 
     const agentStateMap = useMemo(() => 
-        // FIX: Explicitly type the Map to ensure TypeScript correctly infers the value type as AgentStatus.
-        new Map<string, AgentStatus>(agentStates.map(agent => [agent.id, agent.status])), 
+        new Map(agentStates.map(agent => [agent.id, agent.status])), 
     [agentStates]);
 
     const filteredRecords = useMemo(() => {

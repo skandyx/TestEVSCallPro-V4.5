@@ -1,6 +1,5 @@
 const pool = require('./connection');
 const { keysToCamel } = require('./utils');
-const { publish } = require('../redisClient');
 
 const getNotesForContact = async (contactId) => {
     const query = 'SELECT * FROM contact_notes WHERE contact_id = $1 ORDER BY created_at DESC';
@@ -16,12 +15,7 @@ const createNote = async ({ contactId, agentId, campaignId, note }) => {
     `;
     const newId = `note-${Date.now()}`;
     const res = await pool.query(query, [newId, contactId, agentId, campaignId, note]);
-    const newNote = keysToCamel(res.rows[0]);
-
-    // Publish event for real-time update
-    publish('events:crud', { type: 'newContactNote', payload: newNote });
-
-    return newNote;
+    return keysToCamel(res.rows[0]);
 };
 
 module.exports = {

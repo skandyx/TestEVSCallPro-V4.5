@@ -139,8 +139,8 @@
     }
   },
   "alerts": {
-    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible."
-
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.",
+    "confirmDeleteTitle": "Confirmation de suppression"
   },
   "didManager": {
   "title": "Numéros SDA (DID)",
@@ -230,7 +230,8 @@
     "pageCount": "{count, plural, =0 {0 page} one {1 page} other {# pages}}",
     "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce script ?",
     "usedBy": "Utilisé par :",
-    "deleteDisabledTooltip": "Impossible de supprimer un script assigné à une campagne."
+    "deleteDisabledTooltip": "Impossible de supprimer un script assigné à une campagne.",
+    "confirmDeleteTitle": "Confirmer la suppression du script"
   },
   "ivrManager": {
     "createFlow": "Créer un Flux",
