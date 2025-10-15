@@ -139,7 +139,8 @@
     }
   },
   "alerts": {
-    "confirmDelete": "Are you sure you want to delete this item? This action is irreversible."
+    "confirmDelete": "Are you sure you want to delete this item? This action is irreversible.",
+    "confirmDeleteTitle": "Confirm Deletion"
   },
   "moduleSettings": {
   "descriptions": {
@@ -227,7 +228,8 @@
     "pageCount": "{count, plural, =0 {0 pages} one {1 page} other {# pages}}",
     "confirmDelete": "Are you sure you want to delete this script?",
     "usedBy": "Used by:",
-    "deleteDisabledTooltip": "Cannot delete a script that is assigned to a campaign."
+    "deleteDisabledTooltip": "Cannot delete a script that is assigned to a campaign.",
+    "confirmDeleteTitle": "Confirm Script Deletion"
   },
   "ivrManager": {
     "createFlow": "Create Flow",
