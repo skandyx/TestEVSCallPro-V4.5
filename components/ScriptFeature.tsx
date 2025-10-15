@@ -61,12 +61,22 @@ const ScriptFeature: React.FC<{ feature: Feature }> = ({ feature }) => {
         duplicate('scripts', id);
     };
 
+    // When previewing, update the parent's `editingScript` state to preserve changes made in the builder.
+    const handlePreview = (script: SavedScript) => {
+        setEditingScript(script); // Persist the builder's state in the parent
+        setPreviewScript(script); // Show the preview
+    };
+
+    const handleClosePreview = () => {
+        setPreviewScript(null); // Hide the preview; `editingScript` already has the latest changes
+    };
+
     if (previewScript) {
-        return <AgentPreview script={previewScript} onClose={() => setPreviewScript(null)} />;
+        return <AgentPreview script={previewScript} onClose={handleClosePreview} />;
     }
     
     if (isBuilderOpen && editingScript) {
-        return <ScriptBuilder script={editingScript} onSave={handleSave} onClose={() => setIsBuilderOpen(false)} onPreview={setPreviewScript} />;
+        return <ScriptBuilder script={editingScript} onSave={handleSave} onClose={() => setIsBuilderOpen(false)} onPreview={handlePreview} />;
     }
 
     return (
