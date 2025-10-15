@@ -361,18 +361,15 @@ export const useStore = create<AppState>()(
                             case 'deleteSite':
                                 state.sites = state.sites.filter(s => s.id !== payload.id);
                                 break;
-
-                             // FIX: Add immutable event handlers for new notes and calls to ensure "zero-refresh".
+                                
                             case 'newCallHistory':
-                                // Prepend to show newest first and ensure immutability
                                 state.callHistory = [payload, ...state.callHistory];
                                 break;
                             case 'newContactNote':
-                                // Prepend to show newest first and ensure immutability
                                 state.contactNotes = [payload, ...state.contactNotes];
                                 break;
 
-                            // FIX: Add WebSocket event handlers for agent profiles.
+                             // FIX: Add WebSocket event handlers for agent profiles.
                             case 'newAgentProfile':
                                 state.agentProfiles.push(payload);
                                 break;
