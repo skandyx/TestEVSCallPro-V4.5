@@ -30,19 +30,18 @@ const MaintenanceManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     };
 
     const handleManualBackup = () => {
-        // In a real app, you might want to disable the button while it's running
-        alert("Simulation: Lancement d'une sauvegarde manuelle...");
+        showAlert("Lancement d'une sauvegarde manuelle...", 'info');
     };
 
     const handleRestore = (fileName: string) => {
         if (window.confirm(`Êtes-vous sûr de vouloir restaurer la sauvegarde "${fileName}" ? Cette action est irréversible et écrasera les données actuelles.`)) {
-            alert(`Simulation: Restauration depuis ${fileName}...`);
+            showAlert(`Restauration depuis ${fileName}...`, 'info');
         }
     };
 
     const handleDelete = (fileName: string) => {
          if (window.confirm(`Êtes-vous sûr de vouloir supprimer le fichier de sauvegarde "${fileName}" ?`)) {
-            alert(`Simulation: Suppression de ${fileName}...`);
+            showAlert(`Suppression de ${fileName}...`, 'info');
         }
     };
 

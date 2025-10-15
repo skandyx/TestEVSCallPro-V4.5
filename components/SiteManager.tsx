@@ -197,57 +197,60 @@ const SiteManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     }
 
     return (
-        <div className="space-y-8">
+        <div className="h-full flex flex-col">
             {isCreateModalOpen && <SiteModal site={null} onSave={handleSave} onClose={() => setIsCreateModalOpen(false)} />}
             {editingSite && <SiteModal site={editingSite} onSave={handleSave} onClose={() => setEditingSite(null)} />}
 
-            <header>
-                <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
-                <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
-            </header>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-semibold">{t('siteManager.title')}</h2>
-                    <button onClick={() => setIsCreateModalOpen(true)} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md inline-flex items-center">
-                        <PlusIcon className="w-5 h-5 mr-2" /> {t('siteManager.addSite')}
-                    </button>
+            <div className="flex-shrink-0">
+                <header className="mb-8">
+                    <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
+                    <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
+                </header>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-t-lg shadow-sm border-x border-t border-slate-200 dark:border-slate-700">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-2xl font-semibold">{t('siteManager.title')}</h2>
+                        <button onClick={() => setIsCreateModalOpen(true)} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md inline-flex items-center">
+                            <PlusIcon className="w-5 h-5 mr-2" /> {t('siteManager.addSite')}
+                        </button>
+                    </div>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                        <thead className="bg-slate-50 dark:bg-slate-700">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('siteManager.headers.name')}</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('siteManager.headers.gatewayIp')}</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('siteManager.headers.extensions')}</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('siteManager.headers.directMedia')}</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.actions')}</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
-                            {sites.map(site => {
-                                const agentCount = users.filter(u => u.siteId === site.id).length;
-                                return (
-                                    <tr key={site.id}>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <button onClick={() => handleShowDetail(site)} className="font-medium text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">{site.name}</button>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap font-mono text-sm">{site.ipAddress || '-'}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm">{site.physicalExtensions?.length || 0}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <ToggleSwitch enabled={!!site.directMediaEnabled} onChange={(enabled) => handleSave({ ...site, directMediaEnabled: enabled })} />
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                            <button onClick={() => setEditingSite(site)} className="text-link hover:underline inline-flex items-center"><EditIcon className="w-4 h-4 mr-1"/>{t('common.edit')}</button>
-                                            <button onClick={() => handleDelete(site.id)} disabled={agentCount > 0} title={agentCount > 0 ? t('siteManager.deleteDisabledTooltip') : t('common.delete')} className="text-red-600 hover:text-red-900 dark:hover:text-red-400 inline-flex items-center disabled:text-slate-400 disabled:cursor-not-allowed">
-                                                <TrashIcon className="w-4 h-4 mr-1"/>{t('common.delete')}
-                                            </button>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
+            </div>
+            
+            <div className="flex-1 min-h-0 overflow-y-auto bg-white dark:bg-slate-800 rounded-b-lg shadow-sm border border-slate-200 dark:border-slate-700">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                    <thead className="bg-slate-50 dark:bg-slate-700 sticky top-0 z-10">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('siteManager.headers.name')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('siteManager.headers.gatewayIp')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('siteManager.headers.extensions')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('siteManager.headers.directMedia')}</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.actions')}</th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+                        {sites.map(site => {
+                            const agentCount = users.filter(u => u.siteId === site.id).length;
+                            return (
+                                <tr key={site.id}>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <button onClick={() => handleShowDetail(site)} className="font-medium text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">{site.name}</button>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap font-mono text-sm">{site.ipAddress || '-'}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">{site.physicalExtensions?.length || 0}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <ToggleSwitch enabled={!!site.directMediaEnabled} onChange={(enabled) => handleSave({ ...site, directMediaEnabled: enabled })} />
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                        <button onClick={() => setEditingSite(site)} className="text-link hover:underline inline-flex items-center"><EditIcon className="w-4 h-4 mr-1"/>{t('common.edit')}</button>
+                                        <button onClick={() => handleDelete(site.id)} disabled={agentCount > 0} title={agentCount > 0 ? t('siteManager.deleteDisabledTooltip') : t('common.delete')} className="text-red-600 hover:text-red-900 dark:hover:text-red-400 inline-flex items-center disabled:text-slate-400 disabled:cursor-not-allowed">
+                                            <TrashIcon className="w-4 h-4 mr-1"/>{t('common.delete')}
+                                        </button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
             </div>
         </div>
     );
@@ -349,56 +352,61 @@ const SiteDetailView: React.FC<{ site: Site, onBack: () => void, onSave: (site: 
     );
 
     return (
-        <div className="space-y-6">
+        <div className="h-full flex flex-col">
             <AddExtensionModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onAdd={handleAddExtension} existingExtensions={site.physicalExtensions?.map(e => e.number) || []} />
             <BulkGenerateModal isOpen={isBulkModalOpen} onClose={() => setIsBulkModalOpen(false)} onGenerate={handleBulkGenerate} />
 
-            <header>
-                <button onClick={onBack} className="flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 mb-2"><ArrowLeftIcon className="w-5 h-5"/> {t('siteManager.backToList')}</button>
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{site.name}</h1>
-                        <p className="mt-1 text-lg text-slate-600 dark:text-slate-400">{t('siteManager.detail.description')}</p>
+            <div className="flex-shrink-0">
+                <header className="mb-6">
+                    <button onClick={onBack} className="flex items-center gap-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 mb-2"><ArrowLeftIcon className="w-5 h-5"/> {t('siteManager.backToList')}</button>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{site.name}</h1>
+                            <p className="mt-1 text-lg text-slate-600 dark:text-slate-400">{t('siteManager.detail.description')}</p>
+                        </div>
+                         <div className="flex items-center gap-4 p-3 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                            <label className="font-semibold text-slate-800 dark:text-slate-200">{t('siteManager.headers.directMedia')} (Tous)</label>
+                            <ToggleSwitch enabled={!!site.directMediaEnabled} onChange={handleMasterDirectMediaToggle} />
+                        </div>
                     </div>
-                     <div className="flex items-center gap-4 p-3 bg-slate-100 dark:bg-slate-700 rounded-lg">
-                        <label className="font-semibold text-slate-800 dark:text-slate-200">{t('siteManager.headers.directMedia')} (Tous)</label>
-                        <ToggleSwitch enabled={!!site.directMediaEnabled} onChange={handleMasterDirectMediaToggle} />
+                </header>
+                 <div className="bg-white dark:bg-slate-800 p-6 rounded-t-lg shadow-sm border-x border-t border-slate-200 dark:border-slate-700">
+                    <div className="flex justify-between items-center mb-4">
+                        <input type="search" placeholder={t('siteManager.detail.searchPlaceholder')} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full max-w-sm p-2 border rounded-md dark:bg-slate-900 dark:border-slate-600"/>
+                        <div className="flex gap-2">
+                            {selectedExtensions.length > 0 && <button onClick={handleDeleteSelected} className="bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 font-bold py-2 px-4 rounded-lg inline-flex items-center gap-2"><TrashIcon className="w-5 h-5"/>{t('siteManager.detail.deleteSelected', { count: selectedExtensions.length })}</button>}
+                            <button onClick={() => setIsBulkModalOpen(true)} className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg shadow-sm dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">{t('siteManager.detail.bulkGenerate')}</button>
+                            <button onClick={() => setIsAddModalOpen(true)} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md inline-flex items-center"><PlusIcon className="w-5 h-5 mr-2" />{t('siteManager.detail.addExtension')}</button>
+                        </div>
                     </div>
                 </div>
-            </header>
-             <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="flex justify-between items-center mb-4">
-                    <input type="search" placeholder={t('siteManager.detail.searchPlaceholder')} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full max-w-sm p-2 border rounded-md dark:bg-slate-900 dark:border-slate-600"/>
-                    <div className="flex gap-2">
-                        {selectedExtensions.length > 0 && <button onClick={handleDeleteSelected} className="bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 font-bold py-2 px-4 rounded-lg inline-flex items-center gap-2"><TrashIcon className="w-5 h-5"/>{t('siteManager.detail.deleteSelected', { count: selectedExtensions.length })}</button>}
-                        <button onClick={() => setIsBulkModalOpen(true)} className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg shadow-sm dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">{t('siteManager.detail.bulkGenerate')}</button>
-                        <button onClick={() => setIsAddModalOpen(true)} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md inline-flex items-center"><PlusIcon className="w-5 h-5 mr-2" />{t('siteManager.detail.addExtension')}</button>
-                    </div>
-                </div>
-                 <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                        <thead className="bg-slate-50 dark:bg-slate-700"><tr>
+            </div>
+
+            <div className="flex-1 min-h-0 overflow-y-auto bg-white dark:bg-slate-800 rounded-b-lg shadow-sm border border-slate-200 dark:border-slate-700">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                    <thead className="bg-slate-50 dark:bg-slate-700 sticky top-0 z-10">
+                        <tr>
                             <th className="p-4 w-4"><input type="checkbox" onChange={e => handleSelectAll(e.target.checked)} checked={filteredAndSortedExtensions.length > 0 && selectedExtensions.length === filteredAndSortedExtensions.length} className="h-4 w-4 rounded" /></th>
                             <SortableHeader sortKey="number" label="Extension"/>
                             <SortableHeader sortKey="directMediaEnabled" label={t('siteManager.headers.directMedia')}/>
                             <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.actions')}</th>
-                        </tr></thead>
-                         <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
-                            {filteredAndSortedExtensions.map(ext => (
-                                <tr key={ext.number}>
-                                    <td className="p-4 w-4"><input type="checkbox" checked={selectedExtensions.includes(ext.number)} onChange={e => handleSelect(ext.number, e.target.checked)} className="h-4 w-4 rounded"/></td>
-                                    <td className="px-6 py-4 font-mono">{ext.number}</td>
-                                    <td className="px-6 py-4"><ToggleSwitch enabled={!!ext.directMediaEnabled} onChange={(enabled) => handleExtensionChange(ext.number, 'directMediaEnabled', enabled)} /></td>
-                                    <td className="px-6 py-4 text-right space-x-2">
-                                        <button disabled className="p-2 text-slate-300 dark:text-slate-600 cursor-not-allowed"><EditIcon className="w-5 h-5"/></button>
-                                        <button onClick={() => onSave({ ...site, physicalExtensions: site.physicalExtensions?.filter(e => e.number !== ext.number) })} className="p-2 text-slate-500 hover:text-red-600 dark:hover:text-red-400"><TrashIcon className="w-5 h-5"/></button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-             </div>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+                        {filteredAndSortedExtensions.map(ext => (
+                            <tr key={ext.number}>
+                                <td className="p-4 w-4"><input type="checkbox" checked={selectedExtensions.includes(ext.number)} onChange={e => handleSelect(ext.number, e.target.checked)} className="h-4 w-4 rounded"/></td>
+                                <td className="px-6 py-4 font-mono">{ext.number}</td>
+                                <td className="px-6 py-4"><ToggleSwitch enabled={!!ext.directMediaEnabled} onChange={(enabled) => handleExtensionChange(ext.number, 'directMediaEnabled', enabled)} /></td>
+                                <td className="px-6 py-4 text-right space-x-2">
+                                    <button disabled className="p-2 text-slate-300 dark:text-slate-600 cursor-not-allowed"><EditIcon className="w-5 h-5"/></button>
+                                    <button onClick={() => onSave({ ...site, physicalExtensions: site.physicalExtensions?.filter(e => e.number !== ext.number) })} className="p-2 text-slate-500 hover:text-red-600 dark:hover:text-red-400"><TrashIcon className="w-5 h-5"/></button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

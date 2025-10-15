@@ -14,6 +14,13 @@ type Theme = 'light' | 'dark' | 'system';
 // FIX: Add 'agent-profiles' to EntityName to allow it as a parameter in CRUD functions.
 type EntityName = 'users' | 'campaigns' | 'scripts' | 'user-groups' | 'qualification-groups' | 'qualifications' | 'ivr-flows' | 'trunks' | 'dids' | 'sites' | 'audio-files' | 'agent-profiles';
 
+// FIX: Add Alert interface for the new alert manager system.
+interface Alert {
+    message: string;
+    status: 'success' | 'error' | 'info' | 'warning';
+    type: 'toast' | 'modal';
+}
+
 interface AppState {
     // Auth & User
     currentUser: User | null;
@@ -26,6 +33,8 @@ interface AppState {
     notifications: any[]; // Define a proper type for notifications
     isPublicConfigLoaded: boolean;
     playingFileId: string | null;
+    // FIX: Add alert state property.
+    alert: Alert | null;
 
     // Static & Semi-Static Data
     users: User[];
@@ -100,7 +109,9 @@ interface AppState {
 
 
     // Utility
-    showAlert: (message: string, status: 'success' | 'error' | 'info' | 'warning') => void;
+    // FIX: Update showAlert signature and add hideAlert for the new alert manager.
+    showAlert: (message: string, status: 'success' | 'error' | 'info' | 'warning', type?: 'toast' | 'modal') => void;
+    hideAlert: () => void;
 }
 
 let statusTimer: number | undefined;
@@ -118,6 +129,8 @@ export const useStore = create<AppState>()(
                 notifications: [],
                 isPublicConfigLoaded: false,
                 playingFileId: null,
+                // FIX: Initialize alert state.
+                alert: null,
                 // Data collections
                 users: [], userGroups: [], savedScripts: [], campaigns: [], qualifications: [], qualificationGroups: [],
                 ivrFlows: [], audioFiles: [], trunks: [], dids: [], sites: [], activityTypes: [], personalCallbacks: [],
@@ -604,9 +617,13 @@ export const useStore = create<AppState>()(
                 },
 
 
-                showAlert: (message, status) => {
-                    alert(`${status.toUpperCase()}: ${message}`);
-                }
+                // FIX: Replace old alert with new alert manager implementation.
+                showAlert: (message, status, type = 'toast') => {
+                    set({ alert: { message, status, type: type as 'toast' | 'modal' } });
+                },
+                hideAlert: () => {
+                    set({ alert: null });
+                },
 
             })
         ),

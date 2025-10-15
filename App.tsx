@@ -13,6 +13,7 @@ import MonitoringDashboard from './components/MonitoringDashboard.tsx';
 import UserProfileModal from './components/UserProfileModal.tsx';
 import { publicApiClient } from './src/lib/axios.ts';
 import wsClient from './src/services/wsClient.ts';
+import AlertManager from './components/AlertManager.tsx';
 
 const LoadingSpinner: React.FC = () => (
     <div className="flex items-center justify-center h-full">
@@ -175,6 +176,7 @@ const App: React.FC = () => {
     return (
       <I18nProvider>
           <AppContent />
+          <AlertManager />
       </I18nProvider>
     );
 };

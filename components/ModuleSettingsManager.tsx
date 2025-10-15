@@ -67,14 +67,14 @@ const ModuleSettingsManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     const ROLES_TO_MANAGE: UserRole[] = ['Superviseur', 'Administrateur'];
 
     return (
-        <div className="space-y-8">
-            <header>
+        <div className="h-full flex flex-col">
+            <header className="flex-shrink-0 mb-8">
                 <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
                 <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
             </header>
 
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="p-6">
+            <div className="flex-1 min-h-0 flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+                <div className="flex-shrink-0 p-6">
                     <table className="min-w-full">
                         <thead className="border-b border-slate-200 dark:border-slate-700">
                             <tr>
@@ -87,14 +87,14 @@ const ModuleSettingsManager: React.FC<{ feature: Feature }> = ({ feature }) => {
                     </table>
                 </div>
 
-                <div className="divide-y divide-slate-200 dark:divide-slate-700">
+                <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-slate-200 dark:divide-slate-700">
                     {categoryOrder.map(category => {
                         const categoryFeatures = featuresByCategory[category];
                         if (!categoryFeatures || categoryFeatures.length === 0) return null;
 
                         return (
                              <div key={category}>
-                                <div className="px-6 py-2 bg-slate-50 dark:bg-slate-900/50">
+                                <div className="px-6 py-2 bg-slate-50 dark:bg-slate-900/50 sticky top-0">
                                     <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-300">{t(getCategoryI18nKey(category))}</h3>
                                 </div>
                                 <table className="min-w-full">
@@ -121,7 +121,7 @@ const ModuleSettingsManager: React.FC<{ feature: Feature }> = ({ feature }) => {
                         );
                     })}
                 </div>
-                <div className="bg-slate-50 dark:bg-slate-900/50 px-6 py-4 flex justify-end rounded-b-lg border-t dark:border-slate-700">
+                <div className="flex-shrink-0 bg-slate-50 dark:bg-slate-900/50 px-6 py-4 flex justify-end rounded-b-lg border-t dark:border-slate-700">
                     <button onClick={handleSave} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md">
                         {t('moduleSettings.saveButton')}
                     </button>
