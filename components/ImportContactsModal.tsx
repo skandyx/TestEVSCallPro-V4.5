@@ -171,11 +171,14 @@ const ImportContactsModal: React.FC<ImportContactsModalProps> = ({ onClose, onIm
                 }
             });
 
+            // FIX: Check both 'phoneNumber' and 'phone_number' to robustly find the mapped phone number.
+            const phoneValue = getVal(row, 'phoneNumber') || getVal(row, 'phone_number');
+
             return {
                 id: `contact-import-${Date.now()}-${Math.random()}`,
                 firstName: getVal(row, 'firstName'),
                 lastName: getVal(row, 'lastName'),
-                phoneNumber: getVal(row, 'phoneNumber').replace(/\s/g, ''),
+                phoneNumber: phoneValue.replace(/\s/g, ''),
                 postalCode: getVal(row, 'postalCode'),
                 status: 'pending' as const,
                 customFields,
@@ -218,7 +221,8 @@ const ImportContactsModal: React.FC<ImportContactsModalProps> = ({ onClose, onIm
 
     const isNextDisabled = useMemo(() => {
         if (step === 1 && !file) return true;
-        if (step === 3 && !mappings['phoneNumber']) return true;
+        // FIX: The validation now checks for either 'phoneNumber' or 'phone_number' to accommodate potential inconsistencies in script configurations, ensuring the button is correctly enabled when a phone number is mapped.
+        if (step === 3 && !mappings['phoneNumber'] && !mappings['phone_number']) return true;
         return false;
     }, [step, file, mappings]);
     
