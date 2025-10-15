@@ -834,7 +834,8 @@
           "number": "Numéro",
           "duration": "Durée",
           "qualification": "Qualification"
-        }
+        },
+        "pagination": "Page {currentPage} sur {totalPages} ({totalRecords} enregistrements)"
       }
     },
     "inboundCalls": "Appels Entrants",

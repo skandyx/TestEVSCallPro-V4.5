@@ -448,11 +448,12 @@ const UserManager: React.FC<UserManagerProps> = ({ feature }) => {
                 const term = searchTerm.toLowerCase();
                 const siteName = user.siteId ? siteMap.get(user.siteId)?.toLowerCase() : '';
                 return (
-                    user.firstName.toLowerCase().includes(term) ||
-                    user.lastName.toLowerCase().includes(term) ||
-                    (user.email && user.email.toLowerCase().includes(term)) ||
-                    user.loginId.toLowerCase().includes(term) ||
-                    user.role.toLowerCase().includes(term) ||
+                    // FIX: Added checks for null/undefined before calling toLowerCase to make filtering more robust.
+                    (user.firstName || '').toLowerCase().includes(term) ||
+                    (user.lastName || '').toLowerCase().includes(term) ||
+                    (user.email || '').toLowerCase().includes(term) ||
+                    (user.loginId || '').toLowerCase().includes(term) ||
+                    (user.role || '').toLowerCase().includes(term) ||
                     (siteName && siteName.includes(term))
                 );
             });

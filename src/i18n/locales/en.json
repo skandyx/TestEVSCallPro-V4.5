@@ -831,7 +831,8 @@
           "number": "Number",
           "duration": "Duration",
           "qualification": "Qualification"
-        }
+        },
+        "pagination": "Page {currentPage} of {totalPages} ({totalRecords} records)"
       }
     },
     "inboundCalls": "Inbound Calls",
