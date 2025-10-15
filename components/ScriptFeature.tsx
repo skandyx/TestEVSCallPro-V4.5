@@ -1,6 +1,6 @@
 // FIX: Create content for ScriptFeature.tsx to resolve module error.
 import React, { useState } from 'react';
-import type { Feature, SavedScript } from '../types.ts';
+import type { Feature, SavedScript, ScriptBlock } from '../types.ts';
 // FIX: Corrected module import path by adding the '.ts' extension.
 import { useStore } from '../src/store/useStore.ts';
 import { useI18n } from '../src/i18n/index.tsx';
@@ -24,11 +24,55 @@ const ScriptFeature: React.FC<{ feature: Feature }> = ({ feature }) => {
     const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean, id: string | null }>({ isOpen: false, id: null });
 
     const handleAddNew = () => {
+        const pageId = `page-${Date.now()}`;
+        const defaultBlocks: ScriptBlock[] = [
+            {
+                id: `block-${Date.now()}-1`,
+                name: 'Nom',
+                fieldName: 'last_name',
+                type: 'input',
+                x: 50, y: 50, width: 300, height: 70,
+                content: { placeholder: 'Nom de famille' },
+                displayCondition: null, parentId: null,
+                isStandard: true, isVisible: true, readOnly: true,
+            },
+            {
+                id: `block-${Date.now()}-2`,
+                name: 'Prénom',
+                fieldName: 'first_name',
+                type: 'input',
+                x: 400, y: 50, width: 300, height: 70,
+                content: { placeholder: 'Prénom' },
+                displayCondition: null, parentId: null,
+                isStandard: true, isVisible: true, readOnly: true,
+            },
+            {
+                id: `block-${Date.now()}-3`,
+                name: 'Numéro de Téléphone',
+                fieldName: 'phone_number',
+                type: 'phone',
+                x: 50, y: 150, width: 300, height: 70,
+                content: { placeholder: 'Numéro de téléphone' },
+                displayCondition: null, parentId: null,
+                isStandard: true, isVisible: true, readOnly: true,
+            },
+            {
+                id: `block-${Date.now()}-4`,
+                name: 'Code Postal',
+                fieldName: 'postal_code',
+                type: 'input',
+                x: 400, y: 150, width: 300, height: 70,
+                content: { placeholder: 'Code postal' },
+                displayCondition: null, parentId: null,
+                isStandard: true, isVisible: true, readOnly: true,
+            },
+        ];
+
         const newScript: SavedScript = {
             id: `script-${Date.now()}`,
             name: 'Nouveau Script',
-            pages: [{ id: `page-${Date.now()}`, name: 'Page 1', blocks: [] }],
-            startPageId: `page-${Date.now()}`,
+            pages: [{ id: pageId, name: 'Page 1', blocks: defaultBlocks }],
+            startPageId: pageId,
             backgroundColor: '#f1f5f9',
         };
         setEditingScript(newScript);
