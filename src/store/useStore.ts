@@ -21,6 +21,21 @@ interface Alert {
     type: 'toast' | 'modal';
 }
 
+const storeKeyMap: Record<EntityName, keyof AppState> = {
+    'users': 'users',
+    'campaigns': 'campaigns',
+    'scripts': 'savedScripts',
+    'user-groups': 'userGroups',
+    'qualification-groups': 'qualificationGroups',
+    'qualifications': 'qualifications',
+    'ivr-flows': 'ivrFlows',
+    'trunks': 'trunks',
+    'dids': 'dids',
+    'sites': 'sites',
+    'audio-files': 'audioFiles',
+    'agent-profiles': 'agentProfiles',
+};
+
 interface AppState {
     // Auth & User
     currentUser: User | null;
@@ -376,6 +391,37 @@ export const useStore = create<AppState>()(
                                 state.agentProfiles = state.agentProfiles.filter(p => p.id !== payload.id);
                                 break;
 
+                            case 'newQualification':
+                                // Prevent duplicates from optimistic updates
+                                if (!state.qualifications.some(q => q.id === payload.id)) {
+                                    state.qualifications.push(payload);
+                                }
+                                break;
+                            case 'updateQualification': {
+                                const index = state.qualifications.findIndex(q => q.id === payload.id);
+                                if (index > -1) state.qualifications[index] = payload;
+                                else state.qualifications.push(payload); // Upsert if not found
+                                break;
+                            }
+                            case 'deleteQualification':
+                                state.qualifications = state.qualifications.filter(q => q.id !== payload.id);
+                                break;
+
+                            case 'newQualificationGroup':
+                                if (!state.qualificationGroups.some(qg => qg.id === payload.id)) {
+                                    state.qualificationGroups.push(payload);
+                                }
+                                break;
+                            case 'updateQualificationGroup': {
+                                const index = state.qualificationGroups.findIndex(qg => qg.id === payload.id);
+                                if (index > -1) state.qualificationGroups[index] = payload;
+                                else state.qualificationGroups.push(payload);
+                                break;
+                            }
+                            case 'deleteQualificationGroup':
+                                state.qualificationGroups = state.qualificationGroups.filter(qg => qg.id !== payload.id);
+                                break;
+
                             case 'usersBulkUpdate': case 'qualificationsUpdated': case 'planningUpdated':
                                 get().fetchApplicationData();
                                 break;
@@ -436,30 +482,15 @@ export const useStore = create<AppState>()(
                     let isNew = !data.id;
                 
                     if (data.id) {
-                        const storeKeyMap: Record<EntityName, keyof AppState> = {
-                            'users': 'users',
-                            'campaigns': 'campaigns',
-                            'scripts': 'savedScripts',
-                            'user-groups': 'userGroups',
-                            'qualification-groups': 'qualificationGroups',
-                            'qualifications': 'qualifications',
-                            'ivr-flows': 'ivrFlows',
-                            'trunks': 'trunks',
-                            'dids': 'dids',
-                            'sites': 'sites',
-                            'audio-files': 'audioFiles',
-                            // FIX: Add 'agent-profiles' to the map to enable saving and updating.
-                            'agent-profiles': 'agentProfiles',
-                        };
                         const storeKey = storeKeyMap[entityName];
                         const storeCollection = get()[storeKey] as any[] | undefined;
                         
                         const existsInStore = storeCollection && storeCollection.some(item => item.id === data.id);
                 
                         if (existsInStore) {
-                            isNew = false; // It exists, so it must be an update.
+                            isNew = false;
                         } else {
-                            isNew = true; // It has an ID but is not in the store, so it's a new creation.
+                            isNew = true;
                         }
                     }
                     
@@ -468,28 +499,40 @@ export const useStore = create<AppState>()(
                     
                     let dataToSend = data;
                     if(entityName === 'qualification-groups') {
-                        // The backend route for groups is different
                         const { assignedQualIds, ...groupData } = data;
-                        dataToSend = groupData; // Send only group data to the main endpoint
+                        dataToSend = groupData;
                          if(isNew) {
                              await apiClient.post('/qualification-groups/groups', { ...groupData, assignedQualIds });
                          } else {
                              await apiClient.put(`/qualification-groups/groups/${data.id}`, { ...groupData, assignedQualIds });
                          }
                          get().showAlert('Enregistrement réussi', 'success');
-                         // The backend will broadcast the update via WebSocket
-                         return; // Early return
+                         return;
                     }
 
 
                     try {
                         const response = await apiClient[method](url, dataToSend);
-                        let successMessage = 'Enregistrement réussi';
-                        if (entityName === 'audio-files' && isNew) {
-                            successMessage = 'Import media réussi';
-                        }
-                        get().showAlert(successMessage, 'success');
-                        return response.data;
+                        const savedData = response.data;
+                        
+                        // Optimistic update
+                        set(state => {
+                            const storeKey = storeKeyMap[entityName];
+                            if (storeKey) {
+                                const collection = state[storeKey] as any[];
+                                if (collection) {
+                                    const index = collection.findIndex(item => item.id === savedData.id);
+                                    if (index > -1) {
+                                        collection[index] = savedData;
+                                    } else {
+                                        collection.push(savedData);
+                                    }
+                                }
+                            }
+                        });
+
+                        get().showAlert('Enregistrement réussi', 'success');
+                        return savedData;
                     } catch (error: any) {
                         get().showAlert(error.response?.data?.error || `Erreur lors de l'enregistrement.`, 'error');
                         throw error;
