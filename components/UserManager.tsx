@@ -607,88 +607,91 @@ const UserManager: React.FC<UserManagerProps> = ({ feature }) => {
     if (!currentUser) return null; // Or a loading state
 
     return (
-        <div className="space-y-8">
+        <div className="h-full flex flex-col">
             {isModalOpen && editingUser && <UserModal user={editingUser} users={users} campaigns={campaigns} userGroups={userGroups} sites={sites} agentProfiles={agentProfiles} currentUser={currentUser} onSave={handleSave} onClose={() => setIsModalOpen(false)} />}
             {isImportModalOpen && <ImportUsersModal onClose={() => setIsImportModalOpen(false)} onImport={onImportUsers} existingUsers={users} />}
             {isGeneratingModalOpen && <GenerateModal onClose={() => setIsGeneratingModalOpen(false)} onConfirm={handleConfirmGeneration} sites={sites} />}
-            <header>
-                <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
-                <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
-            </header>
             
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="flex flex-wrap gap-4 justify-between items-center mb-4">
-                <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-200">{t('userManager.title')}</h2>
-                <div className="flex flex-wrap gap-2">
-                    <button onClick={handleImport} className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg shadow-sm transition-colors dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">{t('userManager.importButton')}</button>
-                    <button onClick={() => setIsGeneratingModalOpen(true)} className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg shadow-sm transition-colors dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">{t('userManager.generateButton')}</button>
-                    <button onClick={handleAddNew} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md transition-colors inline-flex items-center">
-                    <span className="material-symbols-outlined mr-2">add</span>
-                    {t('userManager.addUserButton')}
-                    </button>
-                </div>
-                </div>
+            <div className="flex-shrink-0">
+                <header className="mb-8">
+                    <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
+                    <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
+                </header>
                 
-                <div className="mb-4">
-                    <input
-                        type="text"
-                        placeholder={t('userManager.searchPlaceholder')}
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full max-w-lg p-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"
-                    />
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-t-lg shadow-sm border-x border-t border-slate-200 dark:border-slate-700">
+                    <div className="flex flex-wrap gap-4 justify-between items-center mb-4">
+                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-200">{t('userManager.title')}</h2>
+                        <div className="flex flex-wrap gap-2">
+                            <button onClick={handleImport} className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg shadow-sm transition-colors dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">{t('userManager.importButton')}</button>
+                            <button onClick={() => setIsGeneratingModalOpen(true)} className="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-2 px-4 rounded-lg shadow-sm transition-colors dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600">{t('userManager.generateButton')}</button>
+                            <button onClick={handleAddNew} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md transition-colors inline-flex items-center">
+                                <span className="material-symbols-outlined mr-2">add</span>
+                                {t('userManager.addUserButton')}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div className="mb-4">
+                        <input
+                            type="text"
+                            placeholder={t('userManager.searchPlaceholder')}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full max-w-lg p-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"
+                        />
+                    </div>
                 </div>
-
-                <div className="overflow-x-auto">
+            </div>
+            
+            <div className="flex-1 min-h-0 overflow-y-auto bg-white dark:bg-slate-800 rounded-b-lg shadow-sm border border-slate-200 dark:border-slate-700">
                 <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                    <thead className="bg-slate-50 dark:bg-slate-700">
-                    <tr>
-                        <SortableHeader sortKey="firstName" label={t('userManager.headers.name')} />
-                        <SortableHeader sortKey="id" label={t('userManager.headers.id')} />
-                        <SortableHeader sortKey="loginId" label={t('userManager.headers.loginId')} />
-                        <SortableHeader sortKey="role" label={t('userManager.headers.role')} />
-                        <SortableHeader sortKey="siteName" label={t('userManager.headers.site')} />
-                        <SortableHeader sortKey="isActive" label={t('userManager.headers.status')} />
-                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('common.actions')}</th>
-                    </tr>
+                    <thead className="bg-slate-50 dark:bg-slate-700 sticky top-0 z-10">
+                        <tr>
+                            <SortableHeader sortKey="firstName" label={t('userManager.headers.name')} />
+                            <SortableHeader sortKey="id" label={t('userManager.headers.id')} />
+                            <SortableHeader sortKey="loginId" label={t('userManager.headers.loginId')} />
+                            <SortableHeader sortKey="role" label={t('userManager.headers.role')} />
+                            <SortableHeader sortKey="siteName" label={t('userManager.headers.site')} />
+                            <SortableHeader sortKey="isActive" label={t('userManager.headers.status')} />
+                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t('common.actions')}</th>
+                        </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
-                    {filteredAndSortedUsers.map(user => {
-                        const { canDelete, tooltip } = getDeletionState(user);
-                        return (
-                        <tr key={user.id}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                                <div className="h-10 w-10 flex-shrink-0 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center">
-                                <span className="material-symbols-outlined text-2xl text-slate-500 dark:text-slate-400">group</span>
+                        {filteredAndSortedUsers.map(user => {
+                            const { canDelete, tooltip } = getDeletionState(user);
+                            return (
+                            <tr key={user.id}>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                    <div className="h-10 w-10 flex-shrink-0 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-2xl text-slate-500 dark:text-slate-400">group</span>
+                                    </div>
+                                    <div className="ml-4">
+                                    <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{user.firstName} {user.lastName}</div>
+                                    <div className="text-sm text-slate-500 dark:text-slate-400">{user.email}</div>
+                                    </div>
                                 </div>
-                                <div className="ml-4">
-                                <div className="text-sm font-medium text-slate-900 dark:text-slate-100">{user.firstName} {user.lastName}</div>
-                                <div className="text-sm text-slate-500 dark:text-slate-400">{user.email}</div>
-                                </div>
-                            </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400 font-mono">{user.id}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500 dark:text-slate-400">{user.loginId}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">{user.role}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">{user.siteId ? siteMap.get(user.siteId) : '-'}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200'}`}>
-                                {user.isActive ? t('common.active') : t('common.inactive')}
-                            </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
-                            <button onClick={() => handleEdit(user)} className="text-link hover:underline inline-flex items-center"><span className="material-symbols-outlined text-base mr-1">edit</span> {t('common.edit')}</button>
-                            <button onClick={() => onDeleteUser(user.id)} className={`inline-flex items-center ${!canDelete ? 'text-slate-400 cursor-not-allowed' : 'text-red-600 hover:text-red-900 dark:hover:text-red-400'}`} disabled={!canDelete} title={tooltip}>
-                                <span className="material-symbols-outlined text-base mr-1">delete</span> {t('common.delete')}
-                            </button>
-                            </td>
-                        </tr>
-                        )
-                    })}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400 font-mono">{user.id}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500 dark:text-slate-400">{user.loginId}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">{user.role}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">{user.siteId ? siteMap.get(user.siteId) : '-'}</td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200'}`}>
+                                    {user.isActive ? t('common.active') : t('common.inactive')}
+                                </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
+                                <button onClick={() => handleEdit(user)} className="text-link hover:underline inline-flex items-center"><span className="material-symbols-outlined text-base mr-1">edit</span> {t('common.edit')}</button>
+                                <button onClick={() => onDeleteUser(user.id)} className={`inline-flex items-center ${!canDelete ? 'text-slate-400 cursor-not-allowed' : 'text-red-600 hover:text-red-900 dark:hover:text-red-400'}`} disabled={!canDelete} title={tooltip}>
+                                    <span className="material-symbols-outlined text-base mr-1">delete</span> {t('common.delete')}
+                                </button>
+                                </td>
+                            </tr>
+                            )
+                        })}
                     </tbody>
                 </table>
-                </div>
             </div>
         </div>
     );
