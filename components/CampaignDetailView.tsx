@@ -109,7 +109,7 @@ const CampaignDetailView: React.FC<CampaignDetailViewProps> = (props) => {
             case 'contacts':
                 return <ContactsTab 
                             campaign={campaign}
-                            campaignCallHistory={campaignCallHistory}
+                            callHistory={callHistory}
                             contactNotes={contactNotes}
                             qualifications={qualifications}
                             users={users}

@@ -8,7 +8,7 @@ declare var Papa: any;
 
 interface ContactsTabProps {
     campaign: Campaign;
-    campaignCallHistory: CallHistoryRecord[];
+    callHistory: CallHistoryRecord[];
     contactNotes: ContactNote[];
     qualifications: Qualification[];
     users: User[];
@@ -26,7 +26,7 @@ const formatDuration = (seconds: number) => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
 
-const ContactsTab: React.FC<ContactsTabProps> = ({ campaign, campaignCallHistory, contactNotes, qualifications, users, script, onDeleteContacts, currentUser }) => {
+const ContactsTab: React.FC<ContactsTabProps> = ({ campaign, callHistory, contactNotes, qualifications, users, script, onDeleteContacts, currentUser }) => {
     const { t } = useI18n();
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -35,6 +35,10 @@ const ContactsTab: React.FC<ContactsTabProps> = ({ campaign, campaignCallHistory
     const [historyModal, setHistoryModal] = useState<{ isOpen: boolean, contact: Contact | null }>({ isOpen: false, contact: null });
 
     const canDelete = currentUser.role === 'Administrateur' || currentUser.role === 'SuperAdmin';
+
+    const campaignCallHistory = useMemo(() => {
+        return callHistory.filter(c => c.campaignId === campaign.id);
+    }, [callHistory, campaign.id]);
 
     const handleExport = () => {
         const callsByContact = campaignCallHistory.reduce((acc, call) => {
@@ -177,7 +181,7 @@ const ContactsTab: React.FC<ContactsTabProps> = ({ campaign, campaignCallHistory
                     contact={historyModal.contact} 
                     users={users} 
                     qualifications={qualifications}
-                    callHistory={campaignCallHistory}
+                    callHistory={callHistory}
                     contactNotes={contactNotes}
                 />
             )}
