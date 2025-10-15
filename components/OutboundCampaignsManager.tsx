@@ -491,7 +491,7 @@ const OutboundCampaignsManager: React.FC<{ feature: Feature }> = ({ feature }) =
     }
 
     return (
-        <div className="space-y-8">
+        <div className="h-full flex flex-col">
             {isModalOpen && (
                 <CampaignModal
                     campaign={editingCampaign}
@@ -511,66 +511,68 @@ const OutboundCampaignsManager: React.FC<{ feature: Feature }> = ({ feature }) =
                     onImport={handleImport}
                 />
             )}
-            <header>
-                <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
-                <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
-            </header>
+            <div className="flex-shrink-0">
+                <header className="mb-8">
+                    <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
+                    <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
+                </header>
 
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-200">{t('outboundCampaignsManager.list.title')}</h2>
-                    <button onClick={handleAddNew} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md inline-flex items-center">
-                        <span className="material-symbols-outlined mr-2">add</span>
-                        {t('outboundCampaignsManager.list.create')}
-                    </button>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-t-lg shadow-sm border-x border-t border-slate-200 dark:border-slate-700">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-200">{t('outboundCampaignsManager.list.title')}</h2>
+                        <button onClick={handleAddNew} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md inline-flex items-center">
+                            <span className="material-symbols-outlined mr-2">add</span>
+                            {t('outboundCampaignsManager.list.create')}
+                        </button>
+                    </div>
                 </div>
+            </div>
 
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                        <thead className="bg-slate-50 dark:bg-slate-700">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('outboundCampaignsManager.list.headers.name')}</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('outboundCampaignsManager.list.headers.id')}</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('outboundCampaignsManager.list.headers.status')}</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('outboundCampaignsManager.list.headers.contacts')}</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('outboundCampaignsManager.list.headers.mode')}</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.actions')}</th>
+            <div className="flex-1 min-h-0 overflow-y-auto bg-white dark:bg-slate-800 rounded-b-lg shadow-sm border border-slate-200 dark:border-slate-700">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                    <thead className="bg-slate-50 dark:bg-slate-700 sticky top-0 z-10">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('outboundCampaignsManager.list.headers.name')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('outboundCampaignsManager.list.headers.id')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('outboundCampaignsManager.list.headers.status')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('outboundCampaignsManager.list.headers.contacts')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('outboundCampaignsManager.list.headers.mode')}</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.actions')}</th>
+                        </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+                        {campaigns.map(campaign => {
+                            const contactCount = campaign.contacts.length;
+                            const processedCount = campaign.contacts.filter(c => c.status !== 'pending').length;
+                            const progress = contactCount > 0 ? (processedCount / contactCount) * 100 : 0;
+                            
+                            return (
+                            <tr key={campaign.id}>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <button onClick={() => handleShowDetail(campaign)} className="font-medium text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">{campaign.name}</button>
+                                    <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-1.5 mt-1">
+                                        <div className="bg-indigo-600 dark:bg-indigo-500 h-1.5 rounded-full" style={{ width: `${progress}%` }}></div>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400 font-mono">{campaign.id}</td>
+                                <td className="px-6 py-4 whitespace-nowrap"><span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${campaign.isActive ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200'}`}>{t(campaign.isActive ? 'common.active' : 'common.inactive')}</span></td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{processedCount} / {contactCount} ({progress.toFixed(0)}%)</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{campaign.dialingMode}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                    <button onClick={() => handleOpenImportModal(campaign)} className="text-link hover:underline inline-flex items-center"><span className="material-symbols-outlined text-base mr-1">upload_file</span> {t('outboundCampaignsManager.list.actions.import')}</button>
+                                    <button onClick={() => handleEdit(campaign)} className="text-link hover:underline inline-flex items-center"><span className="material-symbols-outlined text-base mr-1">edit</span> {t('common.edit')}</button>
+                                    <button 
+                                        onClick={() => onDeleteCampaign(campaign.id)} 
+                                        disabled={campaign.isActive}
+                                        title={campaign.isActive ? t('outboundCampaignsManager.list.actions.deleteDisabledTooltip') : t('common.delete')}
+                                        className="inline-flex items-center disabled:text-slate-400 disabled:cursor-not-allowed text-red-600 hover:text-red-900 dark:hover:text-red-400">
+                                        <span className="material-symbols-outlined text-base mr-1">delete</span> {t('common.delete')}
+                                    </button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
-                            {campaigns.map(campaign => {
-                                const contactCount = campaign.contacts.length;
-                                const processedCount = campaign.contacts.filter(c => c.status !== 'pending').length;
-                                const progress = contactCount > 0 ? (processedCount / contactCount) * 100 : 0;
-                                
-                                return (
-                                <tr key={campaign.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <button onClick={() => handleShowDetail(campaign)} className="font-medium text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">{campaign.name}</button>
-                                        <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-1.5 mt-1">
-                                            <div className="bg-indigo-600 dark:bg-indigo-500 h-1.5 rounded-full" style={{ width: `${progress}%` }}></div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400 font-mono">{campaign.id}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap"><span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${campaign.isActive ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200'}`}>{t(campaign.isActive ? 'common.active' : 'common.inactive')}</span></td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{processedCount} / {contactCount} ({progress.toFixed(0)}%)</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{campaign.dialingMode}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                        <button onClick={() => handleOpenImportModal(campaign)} className="text-link hover:underline inline-flex items-center"><span className="material-symbols-outlined text-base mr-1">upload_file</span> {t('outboundCampaignsManager.list.actions.import')}</button>
-                                        <button onClick={() => handleEdit(campaign)} className="text-link hover:underline inline-flex items-center"><span className="material-symbols-outlined text-base mr-1">edit</span> {t('common.edit')}</button>
-                                        <button 
-                                            onClick={() => onDeleteCampaign(campaign.id)} 
-                                            disabled={campaign.isActive}
-                                            title={campaign.isActive ? t('outboundCampaignsManager.list.actions.deleteDisabledTooltip') : t('common.delete')}
-                                            className="inline-flex items-center disabled:text-slate-400 disabled:cursor-not-allowed text-red-600 hover:text-red-900 dark:hover:text-red-400">
-                                            <span className="material-symbols-outlined text-base mr-1">delete</span> {t('common.delete')}
-                                        </button>
-                                    </td>
-                                </tr>
-                            )})}
-                        </tbody>
-                    </table>
-                </div>
+                        )})}
+                    </tbody>
+                </table>
             </div>
         </div>
     );

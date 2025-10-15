@@ -115,47 +115,49 @@ const AgentProfileManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     };
     
     return (
-        <div className="space-y-8">
+        <div className="h-full flex flex-col">
             {isModalOpen && <ProfileModal profile={editingProfile} onSave={handleSave} onClose={() => setIsModalOpen(false)} />}
-            <header>
-                <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
-                <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
-            </header>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-semibold">{t('agentProfiles.title')}</h2>
-                    <button onClick={() => { setEditingProfile(null); setIsModalOpen(true); }} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md inline-flex items-center">
-                        <span className="material-symbols-outlined mr-2">add</span> {t('agentProfiles.createButton')}
-                    </button>
+            <div className="flex-shrink-0">
+                <header className="mb-8">
+                    <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
+                    <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
+                </header>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-t-lg shadow-sm border-x border-t border-slate-200 dark:border-slate-700">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-2xl font-semibold">{t('agentProfiles.title')}</h2>
+                        <button onClick={() => { setEditingProfile(null); setIsModalOpen(true); }} className="bg-primary hover:bg-primary-hover text-primary-text font-bold py-2 px-4 rounded-lg shadow-md inline-flex items-center">
+                            <span className="material-symbols-outlined mr-2">add</span> {t('agentProfiles.createButton')}
+                        </button>
+                    </div>
                 </div>
-                 <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                        <thead className="bg-slate-50 dark:bg-slate-700">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.name')}</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('agentProfiles.assignedUsers')}</th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.actions')}</th>
+            </div>
+             <div className="flex-1 min-h-0 overflow-y-auto bg-white dark:bg-slate-800 rounded-b-lg shadow-sm border border-slate-200 dark:border-slate-700">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                    <thead className="bg-slate-50 dark:bg-slate-700 sticky top-0 z-10">
+                        <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.name')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('agentProfiles.assignedUsers')}</th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-400 uppercase">{t('common.actions')}</th>
+                        </tr>
+                    </thead>
+                     <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+                        {agentProfiles.map(profile => {
+                            const assignedUserCount = users.filter(u => u.agentProfileId === profile.id).length;
+                            const isDefault = profile.name === 'Défaut';
+                            return (
+                            <tr key={profile.id}>
+                                <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">{profile.name} {isDefault && <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full ml-2">Défaut</span>}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{assignedUserCount}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                    <button onClick={() => { setEditingProfile(profile); setIsModalOpen(true); }} className="text-link hover:underline inline-flex items-center"><span className="material-symbols-outlined text-base mr-1">edit</span>{t('common.edit')}</button>
+                                    <button onClick={() => handleDelete(profile.id)} disabled={isDefault || assignedUserCount > 0} title={isDefault ? t('agentProfiles.deleteDefaultTooltip') : (assignedUserCount > 0 ? t('agentProfiles.deleteAssignedTooltip') : t('common.delete'))} className="text-red-600 hover:text-red-900 dark:hover:text-red-400 inline-flex items-center disabled:text-slate-400 disabled:cursor-not-allowed">
+                                        <span className="material-symbols-outlined text-base mr-1">delete</span>{t('common.delete')}
+                                    </button>
+                                </td>
                             </tr>
-                        </thead>
-                         <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
-                            {agentProfiles.map(profile => {
-                                const assignedUserCount = users.filter(u => u.agentProfileId === profile.id).length;
-                                const isDefault = profile.name === 'Défaut';
-                                return (
-                                <tr key={profile.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">{profile.name} {isDefault && <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full ml-2">Défaut</span>}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{assignedUserCount}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                        <button onClick={() => { setEditingProfile(profile); setIsModalOpen(true); }} className="text-link hover:underline inline-flex items-center"><span className="material-symbols-outlined text-base mr-1">edit</span>{t('common.edit')}</button>
-                                        <button onClick={() => handleDelete(profile.id)} disabled={isDefault || assignedUserCount > 0} title={isDefault ? t('agentProfiles.deleteDefaultTooltip') : (assignedUserCount > 0 ? t('agentProfiles.deleteAssignedTooltip') : t('common.delete'))} className="text-red-600 hover:text-red-900 dark:hover:text-red-400 inline-flex items-center disabled:text-slate-400 disabled:cursor-not-allowed">
-                                            <span className="material-symbols-outlined text-base mr-1">delete</span>{t('common.delete')}
-                                        </button>
-                                    </td>
-                                </tr>
-                            )})}
-                        </tbody>
-                    </table>
-                </div>
+                        )})}
+                    </tbody>
+                </table>
             </div>
         </div>
     );

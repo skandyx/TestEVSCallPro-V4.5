@@ -52,8 +52,8 @@ const IvrFeature: React.FC<{ feature: Feature }> = ({ feature }) => {
     }
 
     return (
-        <div className="space-y-8">
-            <header className="flex justify-between items-start">
+        <div className="h-full flex flex-col">
+            <header className="flex-shrink-0 flex justify-between items-start mb-8">
                 <div>
                     <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>
                     <p className="mt-2 text-lg text-slate-600 dark:text-slate-400">{t(feature.descriptionKey)}</p>
@@ -63,7 +63,7 @@ const IvrFeature: React.FC<{ feature: Feature }> = ({ feature }) => {
                     {t('ivrManager.createFlow')}
                 </button>
             </header>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+            <div className="flex-1 min-h-0 overflow-y-auto bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
                 <ul className="space-y-3">
                     {ivrFlows.map(flow => (
                         <li key={flow.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/50 rounded-md hover:bg-slate-100 dark:hover:bg-slate-700">
