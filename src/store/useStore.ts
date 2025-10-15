@@ -273,14 +273,16 @@ export const useStore = create<AppState>()(
                                 state.isLoading = false;
                                 break;
                             case 'newUser': 
-                                state.users.push(payload); 
-                                if (payload.role === 'Agent') {
-// FIX: Replace unsafe spread `...payload` with `Object.assign` to prevent "Spread types may only be created from object types" error when payload is of type `any`.
-                                     state.agentStates.push(Object.assign({}, payload, {
-                                        status: 'Déconnecté' as AgentStatus,
-                                        statusDuration: 0, callsHandledToday: 0, averageHandlingTime: 0, averageTalkTime: 0,
-                                        pauseCount: 0, trainingCount: 0, totalPauseTime: 0, totalTrainingTime: 0, totalConnectedTime: 0
-                                    }));
+                                if (!state.users.some(u => u.id === payload.id)) {
+                                    state.users.push(payload); 
+                                    if (payload.role === 'Agent') {
+                                        // FIX: Replace unsafe spread `...payload` with `Object.assign` to prevent "Spread types may only be created from object types" error when payload is of type `any`.
+                                        state.agentStates.push(Object.assign({}, payload, {
+                                            status: 'Déconnecté' as AgentStatus,
+                                            statusDuration: 0, callsHandledToday: 0, averageHandlingTime: 0, averageTalkTime: 0,
+                                            pauseCount: 0, trainingCount: 0, totalPauseTime: 0, totalTrainingTime: 0, totalConnectedTime: 0
+                                        }));
+                                    }
                                 }
                                 break;
                             case 'updateUser': {
@@ -315,7 +317,11 @@ export const useStore = create<AppState>()(
                                 state.agentStates = state.agentStates.filter(a => a.id !== payload.id);
                                 break;
                             
-                            case 'newGroup': state.userGroups.push(payload); break;
+                            case 'newGroup':
+                                if (!state.userGroups.some(g => g.id === payload.id)) {
+                                    state.userGroups.push(payload);
+                                }
+                                break;
                             case 'updateGroup': {
                                 const index = state.userGroups.findIndex(g => g.id === payload.id);
                                 if (index > -1) state.userGroups[index] = payload;
@@ -331,7 +337,11 @@ export const useStore = create<AppState>()(
                             }
                             case 'deleteCampaign': state.campaigns = state.campaigns.filter(c => c.id !== payload.id); break;
 
-                            case 'newScript': state.savedScripts.push(payload); break;
+                            case 'newScript':
+                                if (!state.savedScripts.some(s => s.id === payload.id)) {
+                                    state.savedScripts.push(payload);
+                                }
+                                break;
                             case 'updateScript': {
                                 const index = state.savedScripts.findIndex(s => s.id === payload.id);
                                 if (index > -1) state.savedScripts[index] = payload;
@@ -339,7 +349,11 @@ export const useStore = create<AppState>()(
                             }
                             case 'deleteScript': state.savedScripts = state.savedScripts.filter(s => s.id !== payload.id); break;
                             
-                            case 'newIvrFlow': state.ivrFlows.push(payload); break;
+                            case 'newIvrFlow':
+                                if (!state.ivrFlows.some(f => f.id === payload.id)) {
+                                    state.ivrFlows.push(payload);
+                                }
+                                break;
                             case 'updateIvrFlow': {
                                 const index = state.ivrFlows.findIndex(f => f.id === payload.id);
                                 if (index > -1) state.ivrFlows[index] = payload;
@@ -348,7 +362,9 @@ export const useStore = create<AppState>()(
                             case 'deleteIvrFlow': state.ivrFlows = state.ivrFlows.filter(f => f.id !== payload.id); break;
 
                             case 'newAudioFile':
-                                state.audioFiles.push(payload);
+                                if (!state.audioFiles.some(f => f.id === payload.id)) {
+                                    state.audioFiles.push(payload);
+                                }
                                 break;
                             case 'updateAudioFile': {
                                 const index = state.audioFiles.findIndex(f => f.id === payload.id);
@@ -362,7 +378,9 @@ export const useStore = create<AppState>()(
                             
                             // FIX: Add handlers for site updates to enable zero-refresh functionality.
                             case 'newSite':
-                                state.sites.push(payload);
+                                if (!state.sites.some(s => s.id === payload.id)) {
+                                    state.sites.push(payload);
+                                }
                                 break;
                             case 'updateSite': {
                                 const index = state.sites.findIndex(s => s.id === payload.id);
@@ -379,7 +397,9 @@ export const useStore = create<AppState>()(
 
                             // FIX: Add WebSocket event handlers for agent profiles.
                             case 'newAgentProfile':
-                                state.agentProfiles.push(payload);
+                                if (!state.agentProfiles.some(p => p.id === payload.id)) {
+                                    state.agentProfiles.push(payload);
+                                }
                                 break;
                             case 'updateAgentProfile': {
                                 const index = state.agentProfiles.findIndex(p => p.id === payload.id);
