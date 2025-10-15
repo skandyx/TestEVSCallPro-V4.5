@@ -139,8 +139,7 @@
     }
   },
   "alerts": {
-    "confirmDelete": "هل أنت متأكد أنك تريد حذف هذا العنصر؟ هذا الإجراء لا يمكن التراجع عنه.",
-    "confirmDeleteTitle": "تأكيد الحذف"
+    "confirmDelete": "هل أنت متأكد أنك تريد حذف هذا العنصر؟ هذا الإجراء لا يمكن التراجع عنه."
   },
   "moduleSettings": {
   "descriptions": {
@@ -228,8 +227,7 @@
     "pageCount": "{count, plural, zero {0 صفحات} one {صفحة واحدة} other {# صفحات}}",
     "confirmDelete": "هل أنت متأكد أنك تريد حذف هذا النص؟",
     "usedBy": "مستخدم بواسطة:",
-    "deleteDisabledTooltip": "لا يمكن حذف نص مرتبط بحملة.",
-    "confirmDeleteTitle": "تأكيد حذف النص"
+    "deleteDisabledTooltip": "لا يمكن حذف نص مرتبط بحملة."
   },
   "ivrManager": {
     "createFlow": "إنشاء تدفق",

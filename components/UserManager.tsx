@@ -448,12 +448,12 @@ const UserManager: React.FC<UserManagerProps> = ({ feature }) => {
                 const term = searchTerm.toLowerCase();
                 const siteName = user.siteId ? siteMap.get(user.siteId)?.toLowerCase() : '';
                 return (
-                    // FIX: Added checks for null/undefined before calling toLowerCase to make filtering more robust.
-                    (user.firstName || '').toLowerCase().includes(term) ||
-                    (user.lastName || '').toLowerCase().includes(term) ||
-                    (user.email || '').toLowerCase().includes(term) ||
-                    (user.loginId || '').toLowerCase().includes(term) ||
-                    (user.role || '').toLowerCase().includes(term) ||
+                    // FIX: Explicitly cast properties to String before calling toLowerCase to avoid potential type errors.
+                    (String(user.firstName) || '').toLowerCase().includes(term) ||
+                    (String(user.lastName) || '').toLowerCase().includes(term) ||
+                    (String(user.email) || '').toLowerCase().includes(term) ||
+                    (String(user.loginId) || '').toLowerCase().includes(term) ||
+                    (String(user.role) || '').toLowerCase().includes(term) ||
                     (siteName && siteName.includes(term))
                 );
             });
@@ -674,7 +674,8 @@ const UserManager: React.FC<UserManagerProps> = ({ feature }) => {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400 font-mono">{user.id}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-500 dark:text-slate-400">{user.loginId}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">{user.role}</td>
+                                {/* FIX: Cast user.role to String to ensure it's a valid ReactNode. */}
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">{String(user.role)}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 dark:text-slate-300">{user.siteId ? siteMap.get(user.siteId) : '-'}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200'}`}>

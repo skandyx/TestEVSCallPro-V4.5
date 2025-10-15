@@ -6,7 +6,6 @@ import { useStore } from '../src/store/useStore.ts';
 import { useI18n } from '../src/i18n/index.tsx';
 import ScriptBuilder from './ScriptBuilder.tsx';
 import AgentPreview from './AgentPreview.tsx';
-import ConfirmationModal from './ConfirmationModal.tsx';
 
 const ScriptFeature: React.FC<{ feature: Feature }> = ({ feature }) => {
     const { t } = useI18n();
@@ -21,7 +20,6 @@ const ScriptFeature: React.FC<{ feature: Feature }> = ({ feature }) => {
     const [isBuilderOpen, setIsBuilderOpen] = useState(false);
     const [editingScript, setEditingScript] = useState<SavedScript | null>(null);
     const [previewScript, setPreviewScript] = useState<SavedScript | null>(null);
-    const [confirmDelete, setConfirmDelete] = useState<{ isOpen: boolean, id: string | null }>({ isOpen: false, id: null });
 
     const handleAddNew = () => {
         const newScript: SavedScript = {
@@ -47,16 +45,11 @@ const ScriptFeature: React.FC<{ feature: Feature }> = ({ feature }) => {
     };
     
     const handleDelete = (id: string) => {
-        setConfirmDelete({ isOpen: true, id });
+        if (window.confirm(t('scriptFeature.confirmDelete'))) {
+            deleteEntity('scripts', id);
+        }
     };
     
-    const executeDelete = () => {
-        if (confirmDelete.id) {
-            deleteEntity('scripts', confirmDelete.id);
-        }
-        setConfirmDelete({ isOpen: false, id: null });
-    };
-
     const handleDuplicate = (id: string) => {
         duplicate('scripts', id);
     };
@@ -71,13 +64,6 @@ const ScriptFeature: React.FC<{ feature: Feature }> = ({ feature }) => {
 
     return (
         <div className="h-full flex flex-col">
-            <ConfirmationModal
-                isOpen={confirmDelete.isOpen}
-                onClose={() => setConfirmDelete({ isOpen: false, id: null })}
-                onConfirm={executeDelete}
-                title={t('alerts.confirmDeleteTitle')}
-                message={t('scriptFeature.confirmDelete')}
-            />
             <header className="flex-shrink-0 flex justify-between items-start mb-8">
                 <div>
                     <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">{t(feature.titleKey)}</h1>

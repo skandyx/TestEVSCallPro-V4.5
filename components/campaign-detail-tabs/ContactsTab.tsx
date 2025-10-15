@@ -171,7 +171,15 @@ const ContactsTab: React.FC<ContactsTabProps> = ({ campaign, campaignCallHistory
     return (
         <div>
             {historyModal.isOpen && historyModal.contact && (
-                <ContactHistoryModal isOpen={true} onClose={() => setHistoryModal({ isOpen: false, contact: null })} contact={historyModal.contact} users={users} qualifications={qualifications} />
+                <ContactHistoryModal 
+                    isOpen={true} 
+                    onClose={() => setHistoryModal({ isOpen: false, contact: null })} 
+                    contact={historyModal.contact} 
+                    users={users} 
+                    qualifications={qualifications}
+                    callHistory={campaignCallHistory}
+                    contactNotes={contactNotes}
+                />
             )}
             <div className="flex justify-between items-center mb-4">
                 <input type="search" placeholder={t('campaignDetail.contacts.searchPlaceholder')} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full max-w-sm p-2 border border-slate-300 rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"/>

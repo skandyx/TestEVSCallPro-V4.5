@@ -154,9 +154,26 @@ const GroupEditModal: React.FC<GroupEditModalProps> = ({ group, allQualification
     const [isQualModalOpen, setIsQualModalOpen] = useState(false);
     const [editingQual, setEditingQual] = useState<Qualification | null>(null);
     const [groupName, setGroupName] = useState(group?.name || '');
-    const [assignedIds, setAssignedIds] = useState<string[]>(() => 
-        group ? allQualifications.filter(q => !q.isStandard && q.groupId === group.id).map(q => q.id) : []
-    );
+    
+    // --- START: Zero-Refresh State Management ---
+    // These states track the user's actions (deltas) within the modal session.
+    const [addedIds, setAddedIds] = useState(new Set<string>());
+    const [removedIds, setRemovedIds] = useState(new Set<string>());
+
+    // This is the source of truth from the server, recalculated on every render.
+    const serverAssignedIds = useMemo(() => 
+        new Set(group ? allQualifications.filter(q => q.groupId === group.id && !q.isStandard).map(q => q.id) : [])
+    , [group, allQualifications]);
+
+    // This is the final list of assigned IDs, merging server state with local user changes.
+    const assignedIds = useMemo(() => {
+        const ids = new Set(serverAssignedIds);
+        addedIds.forEach(id => ids.add(id));
+        removedIds.forEach(id => ids.delete(id));
+        return Array.from(ids);
+    }, [serverAssignedIds, addedIds, removedIds]);
+    // --- END: Zero-Refresh State Management ---
+
     const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
 
     const handleSaveAndCloseQualification = (qualification: Qualification) => {
@@ -171,7 +188,14 @@ const GroupEditModal: React.FC<GroupEditModalProps> = ({ group, allQualification
             allQualifications.forEach(q => q.parentId === id && findChildrenRecursive(q.id));
         };
         findChildrenRecursive(qualId);
-        setAssignedIds(prev => [...new Set([...prev, ...toAdd])]);
+        
+        // Add to the 'added' set and remove from the 'removed' set (to cancel a previous removal).
+        setAddedIds(prev => new Set([...prev, ...toAdd]));
+        setRemovedIds(prev => {
+            const next = new Set(prev);
+            toAdd.forEach(id => next.delete(id));
+            return next;
+        });
     };
 
     const handleUnassign = (qualId: string) => {
@@ -181,7 +205,14 @@ const GroupEditModal: React.FC<GroupEditModalProps> = ({ group, allQualification
             allQualifications.forEach(q => q.parentId === id && findChildrenRecursive(q.id));
         };
         findChildrenRecursive(qualId);
-        setAssignedIds(prev => prev.filter(id => !toRemove.has(id)));
+
+        // Add to the 'removed' set and remove from the 'added' set.
+        setRemovedIds(prev => new Set([...prev, ...toRemove]));
+        setAddedIds(prev => {
+            const next = new Set(prev);
+            toRemove.forEach(id => next.delete(id));
+            return next;
+        });
     };
     
     const handleSubmit = (e: React.FormEvent) => {

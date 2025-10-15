@@ -260,7 +260,7 @@ export const useStore = create<AppState>()(
                             case 'newUser': 
                                 state.users.push(payload); 
                                 if (payload.role === 'Agent') {
-// FIX: Replace unsafe spread `...payload` with `Object.assign` to prevent "Spread types may only be created from object types" error when payload is of type `any`.
+                                    // FIX: Replace unsafe spread with Object.assign to handle 'any' type payload safely, avoiding a TypeScript error.
                                      state.agentStates.push(Object.assign({}, payload, {
                                         status: 'Déconnecté' as AgentStatus,
                                         statusDuration: 0, callsHandledToday: 0, averageHandlingTime: 0, averageTalkTime: 0,
@@ -362,6 +362,16 @@ export const useStore = create<AppState>()(
                                 state.sites = state.sites.filter(s => s.id !== payload.id);
                                 break;
 
+                             // FIX: Add immutable event handlers for new notes and calls to ensure "zero-refresh".
+                            case 'newCallHistory':
+                                // Prepend to show newest first and ensure immutability
+                                state.callHistory = [payload, ...state.callHistory];
+                                break;
+                            case 'newContactNote':
+                                // Prepend to show newest first and ensure immutability
+                                state.contactNotes = [payload, ...state.contactNotes];
+                                break;
+
                             // FIX: Add WebSocket event handlers for agent profiles.
                             case 'newAgentProfile':
                                 state.agentProfiles.push(payload);
@@ -374,6 +384,24 @@ export const useStore = create<AppState>()(
                             }
                             case 'deleteAgentProfile':
                                 state.agentProfiles = state.agentProfiles.filter(p => p.id !== payload.id);
+                                break;
+                            
+                            // FIX: Corrected "zero-refresh" bug by making qualification state updates explicitly immutable.
+                            // This ensures React detects the change and re-renders components like the GroupEditModal.
+                            case 'newQualification':
+                                state.qualifications = [...state.qualifications, payload];
+                                break;
+                            case 'updateQualification': {
+                                const exists = state.qualifications.some(q => q.id === payload.id);
+                                if (exists) {
+                                    state.qualifications = state.qualifications.map(q => q.id === payload.id ? payload : q);
+                                } else {
+                                    state.qualifications = [...state.qualifications, payload];
+                                }
+                                break;
+                            }
+                            case 'deleteQualification':
+                                state.qualifications = state.qualifications.filter(q => q.id !== payload.id);
                                 break;
 
                             case 'usersBulkUpdate': case 'qualificationsUpdated': case 'planningUpdated':

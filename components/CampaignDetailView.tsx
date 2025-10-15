@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 // FIX: Import the 'Contact' type to resolve the TypeScript error.
 import type { Campaign, SavedScript, CallHistoryRecord, Qualification, User, ContactNote, UserGroup, QualificationGroup, Contact } from '../types.ts';
 import { ArrowLeftIcon, UsersIcon, ChartBarIcon, Cog6ToothIcon } from './Icons.tsx';
@@ -23,6 +23,7 @@ interface CampaignDetailViewProps {
     qualifications: Qualification[];
     users: User[];
     contactNotes: ContactNote[];
+    callHistory: CallHistoryRecord[];
     qualificationGroups: QualificationGroup[];
     savedScripts: SavedScript[];
     userGroups: UserGroup[];
@@ -47,19 +48,13 @@ const KpiCard: React.FC<{ title: string; value: string | number; }> = ({ title, 
 
 
 const CampaignDetailView: React.FC<CampaignDetailViewProps> = (props) => {
-    const { campaign, onBack, qualifications, users, script, onDeleteContacts, onRecycleContacts, contactNotes, currentUser } = props;
+    const { campaign, onBack, qualifications, users, script, onDeleteContacts, onRecycleContacts, contactNotes, currentUser, callHistory } = props;
     const { t } = useI18n();
     const [activeTab, setActiveTab] = useState<DetailTab>('contacts');
-    const [campaignCallHistory, setCampaignCallHistory] = useState<CallHistoryRecord[]>([]);
-    const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
-    useEffect(() => {
-        setIsLoadingHistory(true);
-        apiClient.get(`/campaigns/${campaign.id}/history`)
-            .then(response => setCampaignCallHistory(response.data))
-            .catch(err => console.error("Failed to fetch campaign history", err))
-            .finally(() => setIsLoadingHistory(false));
-    }, [campaign.id]);
+    const campaignCallHistory = useMemo(() => {
+        return callHistory.filter(c => c.campaignId === campaign.id);
+    }, [callHistory, campaign.id]);
 
 
     const campaignStats = useMemo(() => {
@@ -186,11 +181,7 @@ const CampaignDetailView: React.FC<CampaignDetailViewProps> = (props) => {
                     <TabButton tab="settings" label={t('campaignDetail.tabs.settings')} icon={Cog6ToothIcon} />
                 </nav></div>
                 <div className="p-6">
-                    {isLoadingHistory ? (
-                        <div className="text-center p-8 text-slate-500">{t('common.loading')}...</div>
-                    ) : (
-                        renderContent()
-                    )}
+                    {renderContent()}
                 </div>
             </div>
         </div>
