@@ -36,7 +36,7 @@
     "invalidCredentials": "Invalid credentials. Please check your login ID and password.",
     "disabledAccount": "Your account is disabled. Please contact an administrator.",
     "serverError": "A server error occurred. Please try again later.",
-    "copyright": "© EVS Call Pro. All rights reserved."
+    "copyright": "© Call Pro. All rights reserved."
   },
   "sidebar": {
     "categories": {
