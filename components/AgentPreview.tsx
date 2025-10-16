@@ -398,7 +398,7 @@ const AgentPreview: React.FC<AgentPreviewProps> = ({
       if (!matchingQuota) return '';
       const { rule } = matchingQuota;
       const operatorText = t(`outboundCampaignsManager.modal.operators.${rule.operator}`);
-      return t('agentView.activeQuota.title', { field: rule.contactField, operator: operatorText, value: rule.value });
+      return t('agentPreview.activeQuota.cardTitle') + ` : "${rule.value}"`;
   }, [matchingQuota, t]);
 
   const ScriptCanvas = (
