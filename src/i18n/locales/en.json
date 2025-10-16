@@ -249,7 +249,8 @@
       "name": "Name",
       "count": "Member Count"
     },
-    "noGroups": "No groups have been created."
+    "noGroups": "No groups have been created.",
+    "deleteDisabledTooltip": "Cannot delete a group that contains members."
   },
   "userManager": {
     "title": "User Management",

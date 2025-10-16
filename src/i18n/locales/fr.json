@@ -250,7 +250,8 @@
       "name": "Nom",
       "count": "Nombre de membres"
     },
-    "noGroups": "Aucun groupe n'a été créé."
+    "noGroups": "Aucun groupe n'a été créé.",
+    "deleteDisabledTooltip": "Impossible de supprimer un groupe qui contient des membres."
   },
   "userManager": {
     "title": "Gestion des Utilisateurs",

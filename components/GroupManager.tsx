@@ -172,16 +172,26 @@ const GroupManager: React.FC<{ feature: Feature }> = ({ feature }) => {
                         </tr>
                     </thead>
                     <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
-                        {filteredGroups.length > 0 ? filteredGroups.map(group => (
-                            <tr key={group.id}>
-                                <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">{group.name}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{group.memberIds.length}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                    <button onClick={() => handleEdit(group)} className="text-link hover:underline inline-flex items-center"><EditIcon className="w-4 h-4 mr-1"/>{t('common.edit')}</button>
-                                    <button onClick={() => handleDelete(group.id)} className="text-red-600 hover:text-red-900 dark:hover:text-red-400 inline-flex items-center"><TrashIcon className="w-4 h-4 mr-1"/>{t('common.delete')}</button>
-                                </td>
-                            </tr>
-                        )) : (
+                        {filteredGroups.length > 0 ? filteredGroups.map(group => {
+                            const hasMembers = group.memberIds.length > 0;
+                            return (
+                                <tr key={group.id}>
+                                    <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-800 dark:text-slate-100">{group.name}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">{group.memberIds.length}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                        <button onClick={() => handleEdit(group)} className="text-link hover:underline inline-flex items-center"><EditIcon className="w-4 h-4 mr-1"/>{t('common.edit')}</button>
+                                        <button 
+                                            onClick={() => handleDelete(group.id)} 
+                                            disabled={hasMembers}
+                                            title={hasMembers ? t('groupManager.deleteDisabledTooltip') : t('common.delete')}
+                                            className="text-red-600 hover:text-red-900 dark:hover:text-red-400 inline-flex items-center disabled:text-slate-400 disabled:cursor-not-allowed"
+                                        >
+                                            <TrashIcon className="w-4 h-4 mr-1"/>{t('common.delete')}
+                                        </button>
+                                    </td>
+                                </tr>
+                            );
+                        }) : (
                             <tr>
                                 <td colSpan={3} className="text-center py-8 text-slate-500 dark:text-slate-400 italic">
                                     {t('groupManager.noGroups')}
