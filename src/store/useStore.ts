@@ -21,6 +21,16 @@ interface Alert {
     type: 'toast' | 'modal';
 }
 
+interface ConfirmationState {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    isDestructive?: boolean;
+    confirmText?: string;
+    cancelText?: string;
+}
+
 const storeKeyMap: Record<EntityName, keyof AppState> = {
     'users': 'users',
     'campaigns': 'campaigns',
@@ -50,6 +60,7 @@ interface AppState {
     playingFileId: string | null;
     // FIX: Add alert state property.
     alert: Alert | null;
+    confirmation: ConfirmationState | null;
 
     // Static & Semi-Static Data
     users: User[];
@@ -127,6 +138,8 @@ interface AppState {
     // FIX: Update showAlert signature and add hideAlert for the new alert manager.
     showAlert: (message: string, status: 'success' | 'error' | 'info' | 'warning', type?: 'toast' | 'modal') => void;
     hideAlert: () => void;
+    showConfirmation: (config: Omit<ConfirmationState, 'isOpen'>) => void;
+    hideConfirmation: () => void;
 }
 
 let statusTimer: number | undefined;
@@ -146,6 +159,7 @@ export const useStore = create<AppState>()(
                 playingFileId: null,
                 // FIX: Initialize alert state.
                 alert: null,
+                confirmation: null,
                 // Data collections
                 users: [], userGroups: [], savedScripts: [], campaigns: [], qualifications: [], qualificationGroups: [],
                 ivrFlows: [], audioFiles: [], trunks: [], dids: [], sites: [], activityTypes: [], personalCallbacks: [],
@@ -376,7 +390,7 @@ export const useStore = create<AppState>()(
                                 state.audioFiles = state.audioFiles.filter(f => f.id !== payload.id);
                                 break;
                             
-                            // FIX: Add handlers for site updates to enable zero-refresh functionality.
+                            // FIX: Add WebSocket event handlers for site updates to enable zero-refresh functionality.
                             case 'newSite':
                                 if (!state.sites.some(s => s.id === payload.id)) {
                                     state.sites.push(payload);
@@ -687,6 +701,8 @@ export const useStore = create<AppState>()(
                 hideAlert: () => {
                     set({ alert: null });
                 },
+                showConfirmation: (config) => set({ confirmation: { ...config, isOpen: true } }),
+                hideConfirmation: () => set({ confirmation: null }),
 
             })
         ),

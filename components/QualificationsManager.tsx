@@ -279,12 +279,13 @@ const GroupEditModal: React.FC<GroupEditModalProps> = ({ group, allQualification
 type SortableKeys = 'name' | 'qualCount';
 
 const QualificationsManager: React.FC<{ feature: Feature }> = ({ feature }) => {
-    const { qualifications, qualificationGroups, campaigns, saveOrUpdate, delete: deleteEntity } = useStore(state => ({
+    const { qualifications, qualificationGroups, campaigns, saveOrUpdate, delete: deleteEntity, showConfirmation } = useStore(state => ({
         qualifications: state.qualifications,
         qualificationGroups: state.qualificationGroups,
         campaigns: state.campaigns,
         saveOrUpdate: state.saveOrUpdate,
         delete: state.delete,
+        showConfirmation: state.showConfirmation,
     }));
 
     const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
@@ -298,9 +299,11 @@ const QualificationsManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     };
 
     const onDeleteQualification = (qualificationId: string) => {
-        if(window.confirm(t('alerts.confirmDelete'))) {
-            deleteEntity('qualifications', qualificationId);
-        }
+        showConfirmation({
+            title: t('alerts.confirmDeleteTitle'),
+            message: t('alerts.confirmDelete'),
+            onConfirm: () => deleteEntity('qualifications', qualificationId),
+        });
     };
     
     const onSaveQualificationGroup = (group: QualificationGroup, assignedQualIds: string[]) => {
@@ -309,9 +312,11 @@ const QualificationsManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     };
 
     const onDeleteQualificationGroup = (groupId: string) => {
-         if(window.confirm(t('alerts.confirmDelete'))) {
-            deleteEntity('qualification-groups', groupId);
-        }
+        showConfirmation({
+            title: t('alerts.confirmDeleteTitle'),
+            message: t('alerts.confirmDelete'),
+            onConfirm: () => deleteEntity('qualification-groups', groupId),
+        });
     };
 
     const isGroupInUse = (groupId: string) => {

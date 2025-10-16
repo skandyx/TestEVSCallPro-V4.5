@@ -230,8 +230,7 @@
     "pageCount": "{count, plural, =0 {0 page} one {1 page} other {# pages}}",
     "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce script ?",
     "usedBy": "Utilisé par :",
-    "deleteDisabledTooltip": "Impossible de supprimer un script assigné à une campagne.",
-    "confirmDeleteTitle": "Confirmer la suppression du script"
+    "deleteDisabledTooltip": "Impossible de supprimer un script assigné à une campagne."
   },
   "ivrManager": {
     "createFlow": "Créer un Flux",

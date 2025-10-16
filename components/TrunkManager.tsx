@@ -52,10 +52,11 @@ const TrunkModal: React.FC<TrunkModalProps> = ({ trunk, onSave, onClose }) => {
 
 const TrunkManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     const { t } = useI18n();
-    const { trunks, saveOrUpdate, delete: deleteTrunk } = useStore(state => ({
+    const { trunks, saveOrUpdate, delete: deleteTrunk, showConfirmation } = useStore(state => ({
         trunks: state.trunks,
         saveOrUpdate: state.saveOrUpdate,
         delete: state.delete,
+        showConfirmation: state.showConfirmation,
     }));
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,7 +64,13 @@ const TrunkManager: React.FC<{ feature: Feature }> = ({ feature }) => {
 
     const handleAddNew = () => { setEditingTrunk(null); setIsModalOpen(true); };
     const handleEdit = (trunk: Trunk) => { setEditingTrunk(trunk); setIsModalOpen(true); };
-    const handleDelete = (id: string) => { if (window.confirm(t('alerts.confirmDelete'))) deleteTrunk('trunks', id); };
+    const handleDelete = (id: string) => { 
+        showConfirmation({
+            title: t('alerts.confirmDeleteTitle'),
+            message: t('alerts.confirmDelete'),
+            onConfirm: () => deleteTrunk('trunks', id),
+        });
+    };
     const handleSave = (trunkData: Partial<Trunk>) => { saveOrUpdate('trunks', trunkData); setIsModalOpen(false); setEditingTrunk(null); };
 
     return (

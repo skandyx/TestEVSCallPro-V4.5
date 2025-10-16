@@ -10,11 +10,13 @@ const MaintenanceManager: React.FC<{ feature: Feature }> = ({ feature }) => {
         backupLogs,
         saveBackupSchedule,
         showAlert,
+        showConfirmation,
     } = useStore(state => ({
         backupSchedule: state.backupSchedule,
         backupLogs: state.backupLogs,
         saveBackupSchedule: state.saveBackupSchedule,
         showAlert: state.showAlert,
+        showConfirmation: state.showConfirmation,
     }));
     
     // Local state for form editing
@@ -34,15 +36,20 @@ const MaintenanceManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     };
 
     const handleRestore = (fileName: string) => {
-        if (window.confirm(`Êtes-vous sûr de vouloir restaurer la sauvegarde "${fileName}" ? Cette action est irréversible et écrasera les données actuelles.`)) {
-            showAlert(`Restauration depuis ${fileName}...`, 'info');
-        }
+        showConfirmation({
+            title: "Confirmer la Restauration",
+            message: `Êtes-vous sûr de vouloir restaurer la sauvegarde "${fileName}" ? Cette action est irréversible et écrasera les données actuelles.`,
+            confirmText: "Restaurer",
+            onConfirm: () => showAlert(`Restauration depuis ${fileName}...`, 'info'),
+        });
     };
 
     const handleDelete = (fileName: string) => {
-         if (window.confirm(`Êtes-vous sûr de vouloir supprimer le fichier de sauvegarde "${fileName}" ?`)) {
-            showAlert(`Suppression de ${fileName}...`, 'info');
-        }
+        showConfirmation({
+            title: "Confirmer la Suppression",
+            message: `Êtes-vous sûr de vouloir supprimer le fichier de sauvegarde "${fileName}" ?`,
+            onConfirm: () => showAlert(`Suppression de ${fileName}...`, 'info'),
+        });
     };
 
     return (

@@ -8,10 +8,11 @@ import InlineAudioPlayer from './InlineAudioPlayer.tsx';
 
 const AudioManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     const { t } = useI18n();
-    const { audioFiles, delete: deleteAudioFile, showAlert } = useStore(state => ({
+    const { audioFiles, delete: deleteAudioFile, showAlert, showConfirmation } = useStore(state => ({
         audioFiles: state.audioFiles,
         delete: state.delete,
         showAlert: state.showAlert,
+        showConfirmation: state.showConfirmation,
     }));
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,9 +29,11 @@ const AudioManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     };
 
     const handleDelete = (id: string) => {
-        if (window.confirm(t('alerts.confirmDelete'))) {
-            deleteAudioFile('audio-files', id);
-        }
+        showConfirmation({
+            title: t('alerts.confirmDeleteTitle'),
+            message: t('alerts.confirmDelete'),
+            onConfirm: () => deleteAudioFile('audio-files', id),
+        });
     };
 
     const handleSave = async (data: { name: string; file?: File; duration?: number }) => {

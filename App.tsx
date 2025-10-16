@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import type { Feature, FeatureId, User } from './types.ts';
 import { features } from './data/features.ts';
@@ -14,6 +15,7 @@ import UserProfileModal from './components/UserProfileModal.tsx';
 import { publicApiClient } from './src/lib/axios.ts';
 import wsClient from './src/services/wsClient.ts';
 import AlertManager from './components/AlertManager.tsx';
+import ConfirmationModal from './components/ConfirmationModal.tsx';
 
 const LoadingSpinner: React.FC = () => (
     <div className="flex items-center justify-center h-full">
@@ -22,7 +24,7 @@ const LoadingSpinner: React.FC = () => (
 );
 
 const AppContent: React.FC = () => {
-    const { currentUser, token, appSettings, fetchApplicationData, logout, updatePassword, updateProfilePicture, handleWsEvent } = useStore(state => ({
+    const { currentUser, token, appSettings, fetchApplicationData, logout, updatePassword, updateProfilePicture, handleWsEvent, confirmation, hideConfirmation } = useStore(state => ({
         currentUser: state.currentUser,
         token: state.token,
         appSettings: state.appSettings,
@@ -31,6 +33,8 @@ const AppContent: React.FC = () => {
         updatePassword: state.updatePassword,
         updateProfilePicture: state.updateProfilePicture,
         handleWsEvent: state.handleWsEvent,
+        confirmation: state.confirmation,
+        hideConfirmation: state.hideConfirmation,
     }));
     
     const { setLanguage } = useI18n();
@@ -84,6 +88,21 @@ const AppContent: React.FC = () => {
     
     return (
         <div className="h-screen w-screen flex bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+            {confirmation && (
+                <ConfirmationModal
+                    isOpen={confirmation.isOpen}
+                    title={confirmation.title}
+                    message={confirmation.message}
+                    onConfirm={() => {
+                        confirmation.onConfirm();
+                        hideConfirmation();
+                    }}
+                    onClose={hideConfirmation}
+                    isDestructive={confirmation.isDestructive}
+                    confirmText={confirmation.confirmText}
+                    cancelText={confirmation.cancelText}
+                />
+            )}
             {showProfileModal && (
                 <UserProfileModal 
                     user={currentUser} 

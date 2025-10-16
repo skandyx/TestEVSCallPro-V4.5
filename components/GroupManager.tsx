@@ -93,11 +93,12 @@ const GroupModal: React.FC<GroupModalProps> = ({ group, users, onSave, onClose }
 // Main Component
 const GroupManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     const { t } = useI18n();
-    const { userGroups, users, saveOrUpdate, delete: deleteGroup } = useStore(state => ({
+    const { userGroups, users, saveOrUpdate, delete: deleteGroup, showConfirmation } = useStore(state => ({
         userGroups: state.userGroups,
         users: state.users,
         saveOrUpdate: state.saveOrUpdate,
         delete: state.delete,
+        showConfirmation: state.showConfirmation,
     }));
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -121,9 +122,11 @@ const GroupManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     };
 
     const handleDelete = (id: string) => {
-        if (window.confirm(t('alerts.confirmDelete'))) {
-            deleteGroup('user-groups', id);
-        }
+        showConfirmation({
+            title: t('alerts.confirmDeleteTitle'),
+            message: t('alerts.confirmDelete'),
+            onConfirm: () => deleteGroup('user-groups', id),
+        });
     };
 
     const handleSave = (groupData: Partial<UserGroup>) => {

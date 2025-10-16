@@ -6,11 +6,12 @@ import IvrDesigner from './IvrDesigner.tsx';
 
 const IvrFeature: React.FC<{ feature: Feature }> = ({ feature }) => {
     const { t } = useI18n();
-    const { ivrFlows, saveOrUpdate, delete: deleteEntity, duplicate } = useStore(state => ({
+    const { ivrFlows, saveOrUpdate, delete: deleteEntity, duplicate, showConfirmation } = useStore(state => ({
         ivrFlows: state.ivrFlows,
         saveOrUpdate: state.saveOrUpdate,
         delete: state.delete,
         duplicate: state.duplicate,
+        showConfirmation: state.showConfirmation,
     }));
 
     const [isDesignerOpen, setIsDesignerOpen] = useState(false);
@@ -38,9 +39,11 @@ const IvrFeature: React.FC<{ feature: Feature }> = ({ feature }) => {
     };
     
     const handleDelete = (id: string) => {
-        if (window.confirm(t('alerts.confirmDelete'))) {
-            deleteEntity('ivr-flows', id);
-        }
+        showConfirmation({
+            title: t('alerts.confirmDeleteTitle'),
+            message: t('alerts.confirmDelete'),
+            onConfirm: () => deleteEntity('ivr-flows', id),
+        });
     };
 
     const handleDuplicate = (id: string) => {

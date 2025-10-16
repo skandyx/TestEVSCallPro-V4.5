@@ -49,12 +49,13 @@ const DidModal: React.FC<DidModalProps> = ({ did, trunks, ivrFlows, onSave, onCl
 
 const DidManager: React.FC<{ feature: Feature }> = ({ feature }) => {
     const { t } = useI18n();
-    const { dids, trunks, ivrFlows, saveOrUpdate, delete: deleteDid } = useStore(state => ({
+    const { dids, trunks, ivrFlows, saveOrUpdate, delete: deleteDid, showConfirmation } = useStore(state => ({
         dids: state.dids,
         trunks: state.trunks,
         ivrFlows: state.ivrFlows,
         saveOrUpdate: state.saveOrUpdate,
         delete: state.delete,
+        showConfirmation: state.showConfirmation,
     }));
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,7 +63,13 @@ const DidManager: React.FC<{ feature: Feature }> = ({ feature }) => {
 
     const handleAddNew = () => { setEditingDid(null); setIsModalOpen(true); };
     const handleEdit = (did: Did) => { setEditingDid(did); setIsModalOpen(true); };
-    const handleDelete = (id: string) => { if (window.confirm(t('alerts.confirmDelete'))) deleteDid('dids', id); };
+    const handleDelete = (id: string) => {
+        showConfirmation({
+            title: t('alerts.confirmDeleteTitle'),
+            message: t('alerts.confirmDelete'),
+            onConfirm: () => deleteDid('dids', id),
+        });
+    };
     const handleSave = (didData: Partial<Did>) => { saveOrUpdate('dids', didData); setIsModalOpen(false); setEditingDid(null); };
 
     return (
