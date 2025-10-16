@@ -302,7 +302,8 @@
     "delete": {
       "superAdmin": "The SuperAdmin cannot be deleted.",
       "activeUser": "Deactivate the user before deleting.",
-      "lastAdmin": "Cannot delete the last Administrator."
+      "lastAdmin": "Cannot delete the last Administrator.",
+      "confirmMessage": "Are you sure you want to delete the user {userName}? This action is irreversible."
     }
   },
   "scriptBuilder": {

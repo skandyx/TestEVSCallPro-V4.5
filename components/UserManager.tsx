@@ -402,7 +402,8 @@ const UserManager: React.FC<UserManagerProps> = ({ feature }) => {
         currentUser, 
         saveOrUpdate, 
         delete: deleteEntity, 
-        createUsersBulk
+        createUsersBulk,
+        showConfirmation
     } = useStore(state => ({
         users: state.users,
         campaigns: state.campaigns,
@@ -413,16 +414,13 @@ const UserManager: React.FC<UserManagerProps> = ({ feature }) => {
         saveOrUpdate: state.saveOrUpdate,
         delete: state.delete,
         createUsersBulk: state.createUsersBulk,
+        showConfirmation: state.showConfirmation,
     }));
 
     const siteMap = useMemo(() => new Map(sites.map(s => [s.id, s.name])), [sites]);
 
     const onSaveUser = (user: User, groupIds: string[]) => {
         saveOrUpdate('users', { ...user, groupIds });
-    };
-
-    const onDeleteUser = (userId: string) => {
-        deleteEntity('users', userId);
     };
 
     const onGenerateUsers = (newUsers: User[]) => {
@@ -577,6 +575,14 @@ const UserManager: React.FC<UserManagerProps> = ({ feature }) => {
         setIsGeneratingModalOpen(false);
     };
 
+    const handleDelete = (user: User) => {
+        showConfirmation({
+            title: t('alerts.confirmDeleteTitle'),
+            message: t('userManager.delete.confirmMessage', { userName: `${user.firstName} ${user.lastName}` }),
+            onConfirm: () => deleteEntity('users', user.id),
+        });
+    };
+
     const getDeletionState = (user: User): { canDelete: boolean; tooltip: string } => {
         if (user.role === 'SuperAdmin') {
             return { canDelete: false, tooltip: t('userManager.delete.superAdmin') };
@@ -683,7 +689,7 @@ const UserManager: React.FC<UserManagerProps> = ({ feature }) => {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
                                 <button onClick={() => handleEdit(user)} className="text-link hover:underline inline-flex items-center"><span className="material-symbols-outlined text-base mr-1">edit</span> {t('common.edit')}</button>
-                                <button onClick={() => onDeleteUser(user.id)} className={`inline-flex items-center ${!canDelete ? 'text-slate-400 cursor-not-allowed' : 'text-red-600 hover:text-red-900 dark:hover:text-red-400'}`} disabled={!canDelete} title={tooltip}>
+                                <button onClick={() => handleDelete(user)} className={`inline-flex items-center ${!canDelete ? 'text-slate-400 cursor-not-allowed' : 'text-red-600 hover:text-red-900 dark:hover:text-red-400'}`} disabled={!canDelete} title={tooltip}>
                                     <span className="material-symbols-outlined text-base mr-1">delete</span> {t('common.delete')}
                                 </button>
                                 </td>

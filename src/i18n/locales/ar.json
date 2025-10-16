@@ -302,7 +302,8 @@
     "delete": {
       "superAdmin": "لا يمكن حذف SuperAdmin.",
       "activeUser": "قم بتعطيل المستخدم قبل حذفه.",
-      "lastAdmin": "لا يمكن حذف آخر مسؤول."
+      "lastAdmin": "لا يمكن حذف آخر مسؤول.",
+      "confirmMessage": "هل أنت متأكد أنك تريد حذف المستخدم {userName}؟ هذا الإجراء لا يمكن التراجع عنه."
     }
   },
   "scriptBuilder": {

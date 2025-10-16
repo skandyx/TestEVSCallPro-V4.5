@@ -303,7 +303,8 @@
     "delete": {
       "superAdmin": "Le SuperAdmin ne peut pas être supprimé.",
       "activeUser": "Désactivez l'utilisateur avant de le supprimer.",
-      "lastAdmin": "Impossible de supprimer le dernier Administrateur."
+      "lastAdmin": "Impossible de supprimer le dernier Administrateur.",
+      "confirmMessage": "Êtes-vous sûr de vouloir supprimer l'utilisateur {userName} ? Cette action est irréversible."
     }
   },
   "scriptBuilder": {
