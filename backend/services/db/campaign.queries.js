@@ -2,6 +2,7 @@
 const pool = require('./connection');
 const { keysToCamel } = require('./utils');
 const { publish } = require('../redisClient');
+const logger = require('../logger.js');
 
 const getCampaigns = async () => {
     const query = `
@@ -60,8 +61,8 @@ const saveCampaign = async (campaign, id) => {
 
         if (id) {
             const res = await client.query(
-                'UPDATE campaigns SET name=$1, description=$2, script_id=$3, qualification_group_id=$4, caller_id=$5, is_active=$6, dialing_mode=$7, priority=$8, wrap_up_time=$9, quota_rules=$10, filter_rules=$11, quotas_enabled=$12, updated_at=NOW() WHERE id=$13 RETURNING *',
-                [campaignData.name, campaignData.description, campaignData.scriptId, campaignData.qualificationGroupId, campaignData.callerId, campaignData.isActive, campaignData.dialingMode, campaignData.priority, campaignData.wrapUpTime, JSON.stringify(campaignData.quotaRules), JSON.stringify(campaignData.filterRules), campaignData.quotasEnabled || false, id]
+                'UPDATE campaigns SET name=$1, description=$2, script_id=$3, qualification_group_id=$4, caller_id=$5, is_active=$6, dialing_mode=$7, priority=$8, wrap_up_time=$9, quota_rules=$10, filter_rules=$11, quotas_enabled=$12, unlock_timeouts_enabled=$13, unlock_timeout_minutes=$14, unreachable_limit=$15, updated_at=NOW() WHERE id=$16 RETURNING *',
+                [campaignData.name, campaignData.description, campaignData.scriptId, campaignData.qualificationGroupId, campaignData.callerId, campaignData.isActive, campaignData.dialingMode, campaignData.priority, campaignData.wrapUpTime, JSON.stringify(campaignData.quotaRules), JSON.stringify(campaignData.filterRules), campaignData.quotasEnabled || false, campaignData.unlockTimeoutsEnabled || false, campaignData.unlockTimeoutMinutes || 5, campaignData.unreachableLimit || 5, id]
             );
             if (res.rows.length === 0) {
                 throw new Error(`La campagne avec l'ID ${id} n'a pas été trouvée.`);
@@ -70,8 +71,8 @@ const saveCampaign = async (campaign, id) => {
         } else {
             const newId = `campaign-${Date.now()}`;
             const res = await client.query(
-                'INSERT INTO campaigns (id, name, description, script_id, qualification_group_id, caller_id, is_active, dialing_mode, priority, wrap_up_time, quota_rules, filter_rules, quotas_enabled) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *',
-                [newId, campaignData.name, campaignData.description, campaignData.scriptId, campaignData.qualificationGroupId, campaignData.callerId, campaignData.isActive, campaignData.dialingMode, campaignData.priority, campaignData.wrapUpTime, JSON.stringify(campaignData.quotaRules || []), JSON.stringify(campaignData.filterRules || []), campaignData.quotasEnabled || false]
+                'INSERT INTO campaigns (id, name, description, script_id, qualification_group_id, caller_id, is_active, dialing_mode, priority, wrap_up_time, quota_rules, filter_rules, quotas_enabled, unlock_timeouts_enabled, unlock_timeout_minutes, unreachable_limit) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *',
+                [newId, campaignData.name, campaignData.description, campaignData.scriptId, campaignData.qualificationGroupId, campaignData.callerId, campaignData.isActive, campaignData.dialingMode, campaignData.priority, campaignData.wrapUpTime, JSON.stringify(campaignData.quotaRules || []), JSON.stringify(campaignData.filterRules || []), campaignData.quotasEnabled || false, campaignData.unlockTimeoutsEnabled || false, campaignData.unlockTimeoutMinutes || 5, campaignData.unreachableLimit || 5]
             );
             savedCampaign = res.rows[0];
         }
@@ -299,6 +300,30 @@ const qualifyContact = async (contactId, qualificationId, campaignId, agentId, r
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
+        
+        // --- NEW LOGIC for UNREACHABLE LIMIT ---
+        const campaignSettingsRes = await client.query('SELECT unreachable_limit FROM campaigns WHERE id = $1', [campaignId]);
+        const unreachableLimit = campaignSettingsRes.rows[0]?.unreachable_limit;
+        const UNREACHABLE_QUALS = ['qual-90', 'qual-93']; // Occupé, Repondeur
+
+        if (unreachableLimit > 0 && UNREACHABLE_QUALS.includes(qualificationId)) {
+            const historyCountRes = await client.query(
+                `SELECT COUNT(*) FROM call_history 
+                 WHERE contact_id = $1 AND campaign_id = $2 AND qualification_id = ANY($3::text[])`,
+                [contactId, campaignId, UNREACHABLE_QUALS]
+            );
+            
+            const previousUnreachableCount = parseInt(historyCountRes.rows[0].count, 10);
+
+            // Add 1 for the current call being qualified
+            if ((previousUnreachableCount + 1) >= unreachableLimit) {
+                const logMessage = `Contact ${contactId} reached unreachable limit of ${unreachableLimit}. Overriding qualification to qual-99.`;
+                console.log(`[DB] ${logMessage}`);
+                logger.logSystem('INFO', 'Auto-Qualify', logMessage);
+                qualificationId = 'qual-99'; // Override with Unreachable Limit qualification
+            }
+        }
+        // --- END OF NEW LOGIC ---
 
         const qualRes = await client.query('SELECT type FROM qualifications WHERE id = $1', [qualificationId]);
         const isPositive = qualRes.rows.length > 0 && qualRes.rows[0].type === 'positive';

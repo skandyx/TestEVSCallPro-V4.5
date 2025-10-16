@@ -55,6 +55,7 @@ INSERT INTO qualifications (id, code, description, "type", is_standard, is_recyc
 ('qual-95', '95', 'Relance', 'neutral', true, false),
 ('qual-96', '96', 'Indisponible', 'neutral', true, true),
 ('qual-97', '97', 'Transfert', 'neutral', true, false),
+('qual-99', '99', 'Limite Injoignable Atteinte', 'negative', true, false),
 ('qual-101', '101', 'Appel Non Qualifié (Système)', 'neutral', true, true);
 
 -- =============================================================================

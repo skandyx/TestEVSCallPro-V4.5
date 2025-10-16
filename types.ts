@@ -206,6 +206,7 @@ export interface Campaign {
     filterRules: FilterRule[];
     unlockTimeoutsEnabled?: boolean;
     unlockTimeoutMinutes?: number;
+    unreachableLimit?: number;
 }
 
 export interface Contact {

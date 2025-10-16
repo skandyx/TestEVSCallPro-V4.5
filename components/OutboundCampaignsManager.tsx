@@ -63,31 +63,7 @@ const CampaignModal: React.FC<CampaignModalProps> = ({ campaign, users, scripts,
         { dayOfWeek: 7, active: true, startTime: '08:00', endTime: '20:00' },
     ], []);
 
-    const [formData, setFormData] = useState<Partial<Campaign>>(() => {
-        const newCampaignData = {
-            name: '', description: '', scriptId: null, callerId: '', isActive: true,
-            assignedUserIds: [], qualificationGroupId: qualificationGroups.length > 0 ? qualificationGroups[0].id : null,
-            // FIX: Use 'as const' to ensure TypeScript infers a literal type for 'dialingMode', resolving a type error.
-            contacts: [], dialingMode: 'MANUAL' as const, priority: 5, timezone: 'Europe/Paris',
-            schedule: defaultSchedule,
-            maxAbandonRate: 3, paceFactor: 1.2, minAgentsBeforeStart: 1,
-            retryAttempts: 3, retryIntervals: [30, 60, 120], retryOnStatus: [], amdEnabled: true, amdConfidence: 80,
-            // FIX: Use 'as const' to ensure TypeScript infers a literal type for 'voicemailAction', preventing potential type errors.
-            voicemailAction: 'HANGUP' as const, recordingEnabled: true, recordingBeep: true, maxRingDuration: 25, wrapUpTime: 10,
-            maxCallDuration: 3600, quotasEnabled: false, quotaRules: [], filterRules: [],
-        };
-        return campaign ? { ...campaign, schedule: campaign.schedule || defaultSchedule } : newCampaignData;
-    });
-
-    const WEEK_DAYS = useMemo(() => [
-        { label: t('outboundCampaignsManager.modal.weekdays.monday'), value: 1 },
-        { label: t('outboundCampaignsManager.modal.weekdays.tuesday'), value: 2 },
-        { label: t('outboundCampaignsManager.modal.weekdays.wednesday'), value: 3 },
-        { label: t('outboundCampaignsManager.modal.weekdays.thursday'), value: 4 },
-        { label: t('outboundCampaignsManager.modal.weekdays.friday'), value: 5 },
-        { label: t('outboundCampaignsManager.modal.weekdays.saturday'), value: 6 },
-        { label: t('outboundCampaignsManager.modal.weekdays.sunday'), value: 7 },
-    ], [t]);
+    const [formData, setFormData] = useState<Partial<Campaign>>({});
 
     // --- Validation Logic for LEDs ---
     const isNameValid = !!formData.name && formData.name.trim() !== '';
@@ -100,16 +76,18 @@ const CampaignModal: React.FC<CampaignModalProps> = ({ campaign, users, scripts,
         const newCampaignData = {
             name: '', description: '', scriptId: null, callerId: '', isActive: true,
             assignedUserIds: [], qualificationGroupId: qualificationGroups.length > 0 ? qualificationGroups[0].id : null,
-            // FIX: Use 'as const' to ensure TypeScript infers a literal type for 'dialingMode', resolving a type error.
             contacts: [], dialingMode: 'MANUAL' as const, priority: 5, timezone: 'Europe/Paris',
             schedule: defaultSchedule,
             maxAbandonRate: 3, paceFactor: 1.2, minAgentsBeforeStart: 1,
             retryAttempts: 3, retryIntervals: [30, 60, 120], retryOnStatus: [], amdEnabled: true, amdConfidence: 80,
-            // FIX: Use 'as const' to ensure TypeScript infers a literal type for 'voicemailAction', preventing potential type errors.
             voicemailAction: 'HANGUP' as const, recordingEnabled: true, recordingBeep: true, maxRingDuration: 25, wrapUpTime: 10,
             maxCallDuration: 3600, quotasEnabled: false, quotaRules: [], filterRules: [],
+            unlockTimeoutsEnabled: false,
+            unlockTimeoutMinutes: 5,
+            unreachableLimit: 5,
         };
-        setFormData(campaign ? { ...campaign, schedule: campaign.schedule || defaultSchedule } : newCampaignData);
+        const campaignWithDefaults = campaign ? { ...newCampaignData, ...campaign, schedule: campaign.schedule || defaultSchedule } : newCampaignData;
+        setFormData(campaignWithDefaults);
     }, [campaign, qualificationGroups, defaultSchedule]);
 
 
@@ -136,7 +114,7 @@ const CampaignModal: React.FC<CampaignModalProps> = ({ campaign, users, scripts,
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         if (name === 'scriptId') setFormData(prev => ({ ...prev, scriptId: value === '' ? null : value }));
-        else if (e.target.getAttribute('type') === 'number') setFormData(prev => ({ ...prev, [name]: isNaN(parseInt(value, 10)) ? 0 : parseInt(value, 10) }));
+        else if (e.target.getAttribute('type') === 'number' || e.target.getAttribute('type') === 'range') setFormData(prev => ({ ...prev, [name]: isNaN(parseInt(value, 10)) ? 0 : parseInt(value, 10) }));
         else setFormData(prev => ({ ...prev, [name]: value as any }));
     };
     
@@ -208,6 +186,16 @@ const CampaignModal: React.FC<CampaignModalProps> = ({ campaign, users, scripts,
     };
 
     const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); onSave(formData); };
+    
+    const WEEK_DAYS = useMemo(() => [
+        { label: t('outboundCampaignsManager.modal.weekdays.monday'), value: 1 },
+        { label: t('outboundCampaignsManager.modal.weekdays.tuesday'), value: 2 },
+        { label: t('outboundCampaignsManager.modal.weekdays.wednesday'), value: 3 },
+        { label: t('outboundCampaignsManager.modal.weekdays.thursday'), value: 4 },
+        { label: t('outboundCampaignsManager.modal.weekdays.friday'), value: 5 },
+        { label: t('outboundCampaignsManager.modal.weekdays.saturday'), value: 6 },
+        { label: t('outboundCampaignsManager.modal.weekdays.sunday'), value: 7 },
+    ], [t]);
 
     return (
         <div className="fixed inset-0 bg-slate-800 bg-opacity-75 flex items-center justify-center p-4 z-50">
@@ -237,7 +225,54 @@ const CampaignModal: React.FC<CampaignModalProps> = ({ campaign, users, scripts,
                                 <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300">{t('outboundCampaignsManager.modal.labels.dialingMode')}</label><select name="dialingMode" value={formData.dialingMode} onChange={handleChange} className="mt-1 block w-full p-2 border bg-white rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200"><option value="PREDICTIVE">{t('outboundCampaignsManager.modal.dialingModes.predictive')}</option><option value="PROGRESSIVE">{t('outboundCampaignsManager.modal.dialingModes.progressive')}</option><option value="MANUAL">{t('outboundCampaignsManager.modal.dialingModes.manual')}</option></select></div>
                                 <div><label className="block text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center">{t('outboundCampaignsManager.modal.labels.callerId')} <span className={`w-2 h-2 rounded-full inline-block ml-2 ${isCallerIdValid ? 'bg-green-500' : 'bg-red-500'}`}></span></label><input type="text" name="callerId" value={formData.callerId} onChange={handleChange} required className="mt-1 block w-full p-2 border border-slate-300 rounded-md dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200" /></div>
                             </div>
-                             <div className="flex items-center justify-between pt-4 border-t dark:border-slate-700">
+                             <div className="pt-4 border-t dark:border-slate-700 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <label className="font-medium text-slate-700 dark:text-slate-300">Déverrouillage auto. des fiches</label>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">Libère une fiche si un agent est inactif dessus.</p>
+                                    </div>
+                                    <ToggleSwitch 
+                                        enabled={!!formData.unlockTimeoutsEnabled}
+                                        onChange={isEnabled => setFormData(prev => ({ ...prev, unlockTimeoutsEnabled: isEnabled }))}
+                                    />
+                                </div>
+                                {formData.unlockTimeoutsEnabled && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Délai de déverrouillage (5-60 minutes)</label>
+                                        <div className="flex items-center gap-4 mt-1">
+                                            <input 
+                                                type="range" 
+                                                name="unlockTimeoutMinutes" 
+                                                value={formData.unlockTimeoutMinutes || 5} 
+                                                onChange={handleChange}
+                                                min="5" 
+                                                max="60" 
+                                                step="1"
+                                                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700"
+                                            />
+                                            <span className="font-mono text-sm bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-md w-20 text-center">{formData.unlockTimeoutMinutes || 5} min</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                             <div className="pt-4 border-t dark:border-slate-700">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Limite d'injoignabilité (1-50 tentatives)</label>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Après ce nombre de tentatives (ex: répondeur, occupé), la fiche est qualifiée 'Injoignable'.</p>
+                                <div className="flex items-center gap-4">
+                                    <input 
+                                        type="range" 
+                                        name="unreachableLimit" 
+                                        value={formData.unreachableLimit || 5} 
+                                        onChange={handleChange}
+                                        min="1" 
+                                        max="50" 
+                                        step="1"
+                                        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer dark:bg-slate-700"
+                                    />
+                                    <span className="font-mono text-sm bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-md w-20 text-center">{formData.unreachableLimit || 5}</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between pt-4 border-t dark:border-slate-700">
                                 <div>
                                     <label className="font-medium text-slate-700 dark:text-slate-300">{t('outboundCampaignsManager.modal.labels.forceQuotas')}</label>
                                     <p className="text-xs text-slate-500 dark:text-slate-400">{t('outboundCampaignsManager.modal.labels.forceQuotasHelp')}</p>
