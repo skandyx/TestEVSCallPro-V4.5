@@ -430,6 +430,12 @@
   },
   "agentView": {
     "extension": "رقم داخلي {ext}",
+    "agentView": {
+    "extension": "رقم داخلي {ext}",
+    "activeQuota": {
+      "title": "الحصة النشطة: {field} {operator} \"{value}\"",
+      "cardTitle": "الحصة النشطة"
+    },
     "statuses": {
       "available": "متاح",
       "onCall": "في مكالمة",

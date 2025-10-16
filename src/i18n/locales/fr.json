@@ -431,6 +431,10 @@
   },
   "agentView": {
     "extension": "Poste {ext}",
+     "activeQuota": {
+      "title": "Quota actif : {field} {operator} \"{value}\"",
+      "cardTitle": "Quota Actif"
+    },
     "statuses": {
       "available": "En Attente",
       "onCall": "En Appel",

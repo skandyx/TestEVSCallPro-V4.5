@@ -430,6 +430,10 @@
   },
   "agentView": {
     "extension": "Ext. {ext}",
+    "activeQuota": {
+      "title": "Active Quota: {field} {operator} \"{value}\"",
+      "cardTitle": "Active Quota"
+    },
     "statuses": {
       "available": "Available",
       "onCall": "On Call",
