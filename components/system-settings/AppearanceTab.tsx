@@ -64,10 +64,10 @@ const AppearanceTab: React.FC<AppearanceTabProps> = ({ appSettings, handleChange
             </div>
              <div>
                 <label className="block text-sm font-medium">{t('systemSettings.appearance.fontSize')}</label>
-                <select value={appSettings.fontSize || 16} onChange={e => handleChange('fontSize', parseInt(e.target.value))} className="mt-1 w-full p-2 border rounded-md bg-white dark:bg-slate-900 dark:border-slate-600">
-                    <option value={14}>{t('systemSettings.appearance.fontSizes.small')} (14px)</option>
-                    <option value={16}>{t('systemSettings.appearance.fontSizes.normal')} (16px)</option>
-                    <option value={18}>{t('systemSettings.appearance.fontSizes.large')} (18px)</option>
+                <select value={appSettings.fontSize || 12} onChange={e => handleChange('fontSize', parseInt(e.target.value))} className="mt-1 w-full p-2 border rounded-md bg-white dark:bg-slate-900 dark:border-slate-600">
+                    <option value={12}>{t('systemSettings.appearance.fontSizes.small')} (12px)</option>
+                    <option value={14}>{t('systemSettings.appearance.fontSizes.normal')} (14px)</option>
+                    <option value={16}>{t('systemSettings.appearance.fontSizes.large')} (16px)</option>
                 </select>
             </div>
             <div>
