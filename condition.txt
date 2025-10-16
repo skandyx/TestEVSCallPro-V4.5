@@ -1,4 +1,3 @@
-
 ======================================================================
   Règles de Distribution des Fiches aux Agents - EVSCallPro
 ======================================================================
@@ -53,7 +52,7 @@ Ces règles sont impératives pour garantir l'intégrité des données et le res
 1.  **Verrouillage Exclusif des Fiches**
     *   **Principe** : Une fiche ne doit **jamais** être accessible en modification par deux utilisateurs simultanément.
     *   **Comportement Attendu** : Si un agent accède à une fiche (que ce soit par distribution automatique ou via la recherche manuelle), cette fiche est immédiatement **verrouillée** pour cet agent. Si un second agent tente d'accéder à la même fiche, il recevra un message de blocage indiquant : _« Cette fiche est actuellement en cours d’édition par l’agent XXXX. »_
-    *   **Déverrouillage** : La fiche est automatiquement déverrouillée lorsque l'agent la qualifie, la ferme, ou se déconnecte.
+    *   **Déverrouillage** : La fiche est automatiquement déverrouillée lorsque l'agent la qualifie, la ferme, ou se déconnecte, en respectant les nouvelles règles de la Condition 5.
 
 2.  **Exclusivité des Fiches Vierges**
     *   **Principe** : Une fiche vierge, créée manuellement par un agent, lui est exclusivement réservée.
@@ -62,3 +61,24 @@ Ces règles sont impératives pour garantir l'intégrité des données et le res
 3.  **Priorité des Rappels Personnels**
     *   **Principe** : Un rappel personnel est un engagement pris par un agent spécifique envers un client.
     *   **Comportement Attendu** : Les fiches associées à un rappel personnel **ne sont pas incluses** dans le pool de distribution automatique pour les autres agents. Elles restent assignées à l'agent qui les a programmées et n'apparaissent que dans sa liste de rappels personnels.
+
+---
+### Condition 5 : Gestion des Verrous et Fiches Orphelines (Nouveau)
+---
+
+Pour garantir qu'aucune fiche ne reste bloquée indéfiniment, le système applique les logiques de déverrouillage suivantes :
+
+1.  **Déconnexion Propre de l'Agent**
+    *   **Scénario** : Un agent se déconnecte en utilisant le bouton de déconnexion.
+    *   **Logique** : Le système vérifie s'il avait une fiche verrouillée.
+        *   **Si un appel a été passé** mais non qualifié sur cette fiche, la fiche est automatiquement qualifiée avec le statut système **`101 - Appel Non Qualifié (Système)`**. Elle est alors retirée du pool d'appel et mise en quarantaine pour validation par un superviseur.
+        *   **Si aucun appel n'a été passé**, la fiche est simplement déverrouillée et redevient immédiatement disponible pour les autres agents.
+
+2.  **Gestion des Verrous Orphelins (Timeout Configurable)**
+    *   **Scénario** : Un agent perd sa connexion, ferme son navigateur, ou son ordinateur plante (déconnexion non propre). La fiche reste verrouillée.
+    *   **Configuration** : Chaque campagne possède désormais un paramètre optionnel "Déverrouillage Automatique". S'il est activé, un superviseur peut définir un **délai de 5 à 60 minutes**.
+    *   **Logique** : Une tâche de maintenance vérifie périodiquement les fiches verrouillées.
+        *   Si une fiche est verrouillée depuis plus longtemps que le délai configuré pour sa campagne :
+            *   Le système vérifie si un appel a eu lieu. Si oui, la fiche est qualifiée avec **`101 - Appel Non Qualifié (Système)`**.
+            *   Sinon, la fiche est simplement déverrouillée et remise dans le pool d'appel.
+        *   Si la fonctionnalité est désactivée pour la campagne, la fiche restera verrouillée jusqu'à intervention manuelle d'un administrateur.

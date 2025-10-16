@@ -32,13 +32,13 @@ INSERT INTO sites (id, name, ip_address) VALUES
 -- Dans un environnement de production, il faudrait stocker un hash bcrypt.
 -- =============================================================================
 
-INSERT INTO users (id, login_id, extension, first_name, last_name, email, "role", is_active, password_hash, site_id) VALUES
-('user-superadmin', '9999', '9999', 'Super', 'Admin', 'super.admin@example.com', 'SuperAdmin', true, '9999', 'site-paris'),
-('user-admin', '9000', '9000', 'Admin', 'Principal', 'admin.principal@example.com', 'Administrateur', true, '9000', 'site-paris'),
-('user-supervisor', '1000', '1000', 'Serge', 'Superviseur', 'serge.superviseur@example.com', 'Superviseur', true, '1000', 'site-paris'),
-('user-agent-1', '1001', '1001', 'Alice', 'Agent', 'alice.agent@example.com', 'Agent', true, '1001', 'site-paris'),
-('user-agent-2', '1002', '1002', 'Bob', 'Acteur', 'bob.acteur@example.com', 'Agent', true, 'password123', 'site-lyon'),
-('user-agent-3', '1003', '1003', 'Charlie', 'Conseiller', NULL, 'Agent', false, 'password123', 'site-lyon');
+INSERT INTO users (id, login_id, first_name, last_name, email, "role", is_active, password_hash, site_id) VALUES
+('user-superadmin', '9999', 'Super', 'Admin', 'super.admin@example.com', 'SuperAdmin', true, '9999', 'site-paris'),
+('user-admin', '9000', 'Admin', 'Principal', 'admin.principal@example.com', 'Administrateur', true, '9000', 'site-paris'),
+('user-supervisor', '1000', 'Serge', 'Superviseur', 'serge.superviseur@example.com', 'Superviseur', true, '1000', 'site-paris'),
+('user-agent-1', '1001', 'Alice', 'Agent', 'alice.agent@example.com', 'Agent', true, '1001', 'site-paris'),
+('user-agent-2', '1002', 'Bob', 'Acteur', 'bob.acteur@example.com', 'Agent', true, 'password123', 'site-lyon'),
+('user-agent-3', '1003', 'Charlie', 'Conseiller', NULL, 'Agent', false, 'password123', 'site-lyon');
 
 -- =============================================================================
 -- SECTION 3 : QUALIFICATIONS STANDARDS
@@ -46,15 +46,16 @@ INSERT INTO users (id, login_id, extension, first_name, last_name, email, "role"
 -- Elles sont disponibles pour tous les groupes de qualifications.
 -- =============================================================================
 
-INSERT INTO qualifications (id, code, description, "type", is_standard) VALUES
-('qual-90', '90', 'Occupé', 'neutral', true),
-('qual-91', '91', 'Faux numéro', 'negative', true),
-('qual-92', '92', 'Absent', 'neutral', true),
-('qual-93', '93', 'Repondeur', 'neutral', true),
-('qual-94', '94', 'Rappel personnel', 'neutral', true),
-('qual-95', '95', 'Relance', 'neutral', true),
-('qual-96', '96', 'Indisponible', 'neutral', true),
-('qual-97', '97', 'Transfert', 'neutral', true);
+INSERT INTO qualifications (id, code, description, "type", is_standard, is_recyclable) VALUES
+('qual-90', '90', 'Occupé', 'neutral', true, true),
+('qual-91', '91', 'Faux numéro', 'negative', true, false),
+('qual-92', '92', 'Absent', 'neutral', true, true),
+('qual-93', '93', 'Repondeur', 'neutral', true, true),
+('qual-94', '94', 'Rappel personnel', 'neutral', true, false),
+('qual-95', '95', 'Relance', 'neutral', true, false),
+('qual-96', '96', 'Indisponible', 'neutral', true, true),
+('qual-97', '97', 'Transfert', 'neutral', true, false),
+('qual-101', '101', 'Appel Non Qualifié (Système)', 'neutral', true, true);
 
 -- =============================================================================
 -- SECTION 4 : TYPES D'ACTIVITÉS POUR LE PLANNING (alignés sur les statuts agent)

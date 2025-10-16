@@ -204,6 +204,8 @@ export interface Campaign {
     quotasEnabled?: boolean;
     quotaRules: QuotaRule[];
     filterRules: FilterRule[];
+    unlockTimeoutsEnabled?: boolean;
+    unlockTimeoutMinutes?: number;
 }
 
 export interface Contact {

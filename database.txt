@@ -152,6 +152,8 @@ CREATE TABLE campaigns (
     quotas_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     quota_rules JSONB,
     filter_rules JSONB,
+    unlock_timeouts_enabled BOOLEAN DEFAULT FALSE,
+    unlock_timeout_minutes INTEGER DEFAULT 30,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -338,6 +340,7 @@ CREATE TABLE contact_notes (
 -- Ajout d'index pour améliorer les performances des requêtes
 -- =============================================================================
 CREATE INDEX idx_contacts_campaign_status ON contacts (campaign_id, status);
+CREATE INDEX idx_contacts_locked_agent ON contacts (locked_by_agent_id);
 CREATE INDEX idx_call_history_timestamp ON call_history (start_time DESC);
 CREATE INDEX idx_call_history_agent ON call_history (agent_id);
 CREATE INDEX idx_call_history_campaign ON call_history (campaign_id);

@@ -267,23 +267,75 @@ const updateUserProfilePicture = async (userId, pictureUrl) => {
 
 const releaseLocksForAgent = async (agentId) => {
     console.log(`[DB] Releasing locks for agent ${agentId}`);
-    const query = `
-        UPDATE contacts 
-        SET locked_by_agent_id = NULL, locked_at = NULL, updated_at = NOW() 
-        WHERE locked_by_agent_id = $1
-        RETURNING campaign_id;
-    `;
-    const res = await pool.query(query, [agentId]);
-    
-    if (res.rowCount > 0) {
-        const uniqueCampaignIds = [...new Set(res.rows.map(r => r.campaign_id))];
-        for (const campaignId of uniqueCampaignIds) {
-            const { getCampaignById } = require('./campaign.queries');
-            const updatedCampaign = await getCampaignById(campaignId);
-            if (updatedCampaign) {
-                publish('events:crud', { type: 'campaignUpdate', payload: updatedCampaign });
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        const lockedContactsRes = await client.query(
+            'SELECT id, locked_at, campaign_id FROM contacts WHERE locked_by_agent_id = $1',
+            [agentId]
+        );
+
+        if (lockedContactsRes.rows.length === 0) {
+            await client.query('COMMIT');
+            client.release();
+            return; // No locks to release
+        }
+        
+        const affectedCampaignIds = new Set();
+
+        for (const contact of lockedContactsRes.rows) {
+            affectedCampaignIds.add(contact.campaign_id);
+
+            const callHistoryRes = await client.query(
+                `SELECT id FROM call_history 
+                 WHERE contact_id = $1 AND agent_id = $2 AND qualification_id IS NULL AND start_time >= $3 
+                 ORDER BY start_time DESC LIMIT 1`,
+                [contact.id, agentId, contact.locked_at]
+            );
+
+            if (callHistoryRes.rows.length > 0) {
+                // Case 1: Call happened but was not qualified -> Apply system qual and lock
+                const callId = callHistoryRes.rows[0].id;
+                await client.query(
+                    "UPDATE call_history SET qualification_id = 'qual-101' WHERE id = $1",
+                    [callId]
+                );
+                await client.query(
+                    "UPDATE contacts SET status = 'qualified', locked_by_agent_id = NULL, locked_at = NULL, updated_at = NOW() WHERE id = $1",
+                    [contact.id]
+                );
+                console.log(`[DB] Unqualified call for contact ${contact.id} found. Applied qual-101.`);
+            } else {
+                // Case 2: No call, just release the lock
+                await client.query(
+                    "UPDATE contacts SET locked_by_agent_id = NULL, locked_at = NULL, updated_at = NOW() WHERE id = $1",
+                    [contact.id]
+                );
             }
         }
+        
+        await client.query('COMMIT');
+        client.release(); // Release client before async operations
+
+        // Publish updates AFTER transaction is committed
+        const { getCampaignById } = require('./campaign.queries');
+        for (const campaignId of affectedCampaignIds) {
+            try {
+                const updatedCampaign = await getCampaignById(campaignId);
+                if (updatedCampaign) {
+                    publish('events:crud', { type: 'campaignUpdate', payload: updatedCampaign });
+                }
+            } catch(e) {
+                console.error(`[DB] Error fetching campaign ${campaignId} for RT update after lock release:`, e);
+            }
+        }
+
+    } catch (e) {
+        await client.query('ROLLBACK');
+        client.release();
+        console.error(`Failed to release locks for agent ${agentId}:`, e);
+        // Do not re-throw, as this should not block the logout process.
     }
 };
 
