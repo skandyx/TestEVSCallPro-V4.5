@@ -235,7 +235,10 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
             });
         }
         
-        return Array.from(qualMap.values()).sort((a,b) => parseInt(a.code) - parseInt(b.code));
+        // Exclude system-only qualifications (e.g., Unreachable, System disconnect) from the agent's view.
+        return Array.from(qualMap.values())
+            .filter(q => q.id !== 'qual-99' && q.id !== 'qual-101')
+            .sort((a,b) => parseInt(a.code) - parseInt(b.code));
     }, [currentCampaign, qualifications]);
 
 
