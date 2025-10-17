@@ -94,7 +94,10 @@ const Dashboard2Tab: React.FC<Dashboard2TabProps> = ({ campaign, campaignCallHis
         const map = new Map();
         let customIndex = 0;
         qualifications.forEach((qual) => {
-            if (qual.isStandard) {
+            // AJOUT : Condition spéciale pour la qualification système
+            if (qual.id === 'qual-101') {
+                map.set(qual.id, '#000000'); // Couleur Noire
+            } else if (qual.isStandard) { // Le reste de la logique ne change pas
                 if (qual.type === 'positive') map.set(qual.id, 'rgba(34, 197, 94, 0.7)');
                 else if (qual.type === 'negative') map.set(qual.id, 'rgba(239, 68, 68, 0.7)');
                 else map.set(qual.id, 'rgba(100, 116, 139, 0.7)');
