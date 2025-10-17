@@ -215,7 +215,7 @@ const GroupEditModal: React.FC<GroupEditModalProps> = ({ group, allQualification
                                         </button>
                                     ) : <div className="w-5 h-5 mr-1"/>}
                                     <span className="font-mono text-xs bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300 rounded px-1.5 py-0.5 mr-2">{node.code}</span>
-                                    <span className={`inline-block w-2.5 h-2.5 rounded-full mr-2 flex-shrink-0 ${TYPE_DOT_COLORS[node.type]}`}></span>
+                                    <span className={`inline-block w-2.5 h-2.5 rounded-full mr-2 flex-shrink-0 ${node.id === 'qual-101' ? 'bg-black' : TYPE_DOT_COLORS[node.type]}`}></span>
                                     <span className="truncate font-medium text-slate-800 dark:text-slate-200" title={node.description}>{node.description}</span>
                                 </div>
                                 {!node.isStandard && (
