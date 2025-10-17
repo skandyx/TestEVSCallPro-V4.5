@@ -732,9 +732,9 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
                 </div>
             </header>
             
-            <main className="flex-1 grid grid-cols-12 gap-4 p-4 overflow-hidden">
-                <div className="col-span-3 flex flex-col gap-4">
-                     <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border dark:border-slate-700 flex flex-col min-h-0"><h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 border-b dark:border-slate-600 pb-2 mb-4">{t('agentView.kpis.title')}</h2><div className="mb-4"><h3 className="text-base font-semibold text-slate-600 dark:text-slate-300">{t('agentView.kpis.title')}</h3>{agentState ? (<div className="grid grid-cols-2 gap-2 mt-2">
+            <main className="flex-1 grid grid-cols-12 gap-4 p-4 min-h-0">
+                <div className="col-span-3 flex flex-col gap-4 min-h-0">
+                     <div className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border dark:border-slate-700 flex flex-col"><h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 border-b dark:border-slate-600 pb-2 mb-4">{t('agentView.kpis.title')}</h2><div className="mb-4"><h3 className="text-base font-semibold text-slate-600 dark:text-slate-300">{t('agentView.kpis.title')}</h3>{agentState ? (<div className="grid grid-cols-2 gap-2 mt-2">
                         <KpiCard title={t('agentView.kpis.totalConnectedTime')} value={formatTimer(agentState.totalConnectedTime)} />
                         <KpiCard title="DMC" value={formatTimer(agentState.averageTalkTime)} />
                         <KpiCard title={t('agentView.kpis.callsHandled')} value={agentState.callsHandledToday} />
@@ -778,7 +778,7 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
                         )}
                     </div></div>
                 </div>
-                <div className="col-span-9 flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-sm border dark:border-slate-700 overflow-hidden">
+                <div className="col-span-9 flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-sm border dark:border-slate-700 min-h-0">
                     {status === 'En Post-Appel' ? (
                         <div className="h-full flex flex-col items-center justify-center text-center p-8">
                             <svg className="animate-spin h-12 w-12 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
