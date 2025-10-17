@@ -87,7 +87,7 @@ const AppContent: React.FC = () => {
     }
     
     return (
-        <div className="h-screen w-full flex bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+        <div className="h-screen w-screen flex bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200">
             {confirmation && (
                 <ConfirmationModal
                     isOpen={confirmation.isOpen}

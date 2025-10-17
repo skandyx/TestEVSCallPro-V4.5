@@ -196,14 +196,22 @@ const Dashboard2Tab: React.FC<Dashboard2TabProps> = ({ campaign, campaignCallHis
             },
         },
         onClick: (event: any, elems: any) => {
-            if (elems.length && drilldownPath.length < 3) {
+            if (elems.length) {
                 const node = elems[0].element.$context.raw._data;
                 if (node._meta) {
-                    setDrilldownPath(prev => [...prev, node._meta]);
+                    const currentLevel = drilldownPath.length;
+                    
+                    if (currentLevel > 0 && drilldownPath[currentLevel - 1].type === node._meta.type) {
+                        // Remplacer l'élément actuel si on clique sur un frère
+                        setDrilldownPath(prev => [...prev.slice(0, currentLevel - 1), node._meta]);
+                    } else if (currentLevel < 3) {
+                        // Sinon, descendre d'un niveau
+                        setDrilldownPath(prev => [...prev, node._meta]);
+                    }
                 }
             }
         },
-    }), [drilldownPath.length, t]);
+    }), [drilldownPath, t]);
 
     const filteredCallsForDrilldown = useMemo(() => {
         if (drilldownPath.length === 0) return campaignCallHistory;
