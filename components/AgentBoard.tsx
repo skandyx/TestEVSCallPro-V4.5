@@ -97,7 +97,7 @@ const AgentBoard: React.FC<AgentBoardProps> = ({ agents, currentUser, apiCall, o
                     {sortedAgents.length > 0 ? sortedAgents.map(agent => {
                         const agentFullName = `${agent.firstName} ${agent.lastName}`;
                         const canCoach = hasPermission && agent.status === 'En Appel';
-                        const canForcePause = hasPermission && agent.status !== 'En Pause';
+                        const canForcePause = hasPermission && agent.status !== 'En Pause' && agent.status !== 'Déconnecté';
                         const statusConfig = STATUS_CONFIG[agent.status];
                         return (
                         <tr key={agent.id} className={agent.status === 'Déconnecté' ? 'opacity-50' : ''}>
@@ -129,6 +129,8 @@ const AgentBoard: React.FC<AgentBoardProps> = ({ agents, currentUser, apiCall, o
                                 <button onClick={() => handleContactAgent(agent.id, agentFullName)} disabled={!hasPermission || agent.status === 'Déconnecté'} title={t('supervision.agentBoard.actions.contact', { agentName: agentFullName })} className="p-1 rounded-md text-slate-500 hover:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed dark:hover:bg-slate-700"><span className="material-symbols-outlined text-base">mail</span></button>
                                 <button onClick={() => handleSupervisorAction('listen', agent.id)} disabled={!canCoach} title={t('supervision.agentBoard.actions.listen')} className="p-1 rounded-md text-slate-500 hover:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed dark:hover:bg-slate-700"><span className="material-symbols-outlined text-base">hearing</span></button>
                                 <button onClick={() => handleSupervisorAction('coach', agent.id)} disabled={!canCoach} title={t('supervision.agentBoard.actions.coach')} className="p-1 rounded-md text-slate-500 hover:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed dark:hover:bg-slate-700"><span className="material-symbols-outlined text-base">record_voice_over</span></button>
+                                <button onClick={() => handleSupervisorAction('barge', agent.id)} disabled={!canCoach} title={t('supervision.agentBoard.actions.barge')} className="p-1 rounded-md text-slate-500 hover:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed dark:hover:bg-slate-700"><span className="material-symbols-outlined text-base">front_hand</span></button>
+                                <button onClick={() => handleSupervisorAction('force-pause', agent.id)} disabled={!canForcePause} title={t('supervision.agentBoard.actions.forcePause')} className="p-1 rounded-md text-slate-500 hover:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed dark:hover:bg-slate-700"><span className="material-symbols-outlined text-base">pause</span></button>
                                 <button onClick={() => handleForceLogout(agent.id, agentFullName)} disabled={!hasPermission || agent.status === 'Déconnecté'} title={t('supervision.agentBoard.actions.forceLogout')} className="p-1 rounded-md text-red-500 hover:bg-red-100 disabled:text-red-300 disabled:cursor-not-allowed dark:hover:bg-red-900/50"><span className="material-symbols-outlined text-base">logout</span></button>
                             </td>
                         </tr>
