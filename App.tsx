@@ -47,6 +47,7 @@ const AppContent: React.FC = () => {
             setIsLoading(true);
 
             // ✅ Ferme toute connexion précédente AVANT de reconnecter
+            
             wsClient.disconnect?.();
 
             // ✅ Connecte proprement avec nouveau token
@@ -60,6 +61,8 @@ const AppContent: React.FC = () => {
             return () => {
                 // ✅ Supprime les listeners
                 unsubscribe?.();
+                unsubscribe();  
+                wsClient.disconnect();
 
                 // ✅ Optionnel mais safe : ferme aussi le WS pour un reset complet
                 wsClient.disconnect?.();
@@ -68,6 +71,7 @@ const AppContent: React.FC = () => {
             setIsLoading(false);
             // Si logout → tu peux aussi forcer un WS reset ici :
             wsClient.disconnect?.();
+            wsClient.disconnect();
         }
     }, [currentUser, token]);
 
