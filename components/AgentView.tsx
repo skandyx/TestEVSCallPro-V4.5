@@ -710,7 +710,15 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
     };
     
     const canChangeStatus = !['En Appel', 'En Post-Appel', 'Ringing'].includes(status);
-    const availablePauseStatuses = activityTypes.filter(at => at.isActive && !at.isSystem);
+    
+    const availableStatusesForMenu = useMemo(() => {
+        return activityTypes.filter(at => at.isActive && (at.isSystem ? at.id === 'activity-available' : true))
+            .sort((a, b) => {
+                if (a.isSystem) return -1; // 'Disponible' always first
+                if (b.isSystem) return 1;
+                return a.name.localeCompare(b.name);
+            });
+    }, [activityTypes]);
 
     const wrapUpTotal = campaignForWrapUp.current?.wrapUpTime || 0;
     const wrapUpElapsed = agentState?.statusDuration || 0;
@@ -739,14 +747,21 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
                     {isStatusMenuOpen && (
                          <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-md shadow-lg border dark:border-slate-700 p-2 z-20">
                             <div className="space-y-1">
-                                 <button onClick={() => handleStatusChangeClick('En Attente')} disabled={!canChangeStatus} className={`w-full text-left flex items-center gap-3 p-2 rounded-md text-slate-700 dark:text-slate-200 ${agentState?.status === 'En Attente' ? 'bg-indigo-50 dark:bg-indigo-900/50' : 'hover:bg-slate-100 dark:hover:bg-slate-700'} disabled:opacity-50 disabled:cursor-not-allowed`}>
-                                     <span className={`w-2.5 h-2.5 rounded-full ${getStatusColor('En Attente')}`}></span>{t('agentView.statuses.available')}{agentState?.status === 'En Attente' && <span className="material-symbols-outlined text-base text-indigo-600 ml-auto">check</span>}
-                                 </button>
-                                {availablePauseStatuses.map(activity => (
-                                     <button key={activity.id} onClick={() => handleStatusChangeClick(activity.name as AgentStatus)} disabled={!canChangeStatus} className={`w-full text-left flex items-center gap-3 p-2 rounded-md text-slate-700 dark:text-slate-200 ${agentState?.status === activity.name ? 'bg-indigo-50 dark:bg-indigo-900/50' : 'hover:bg-slate-100 dark:hover:bg-slate-700'} disabled:opacity-50 disabled:cursor-not-allowed`}>
-                                         <span className={`w-2.5 h-2.5 rounded-full`} style={{backgroundColor: activity.color}}></span>{activity.name}{agentState?.status === activity.name && <span className="material-symbols-outlined text-base text-indigo-600 ml-auto">check</span>}
-                                     </button>
-                                ))}
+                                {availableStatusesForMenu.map(activity => {
+                                    const statusToSet: AgentStatus = activity.id === 'activity-available' ? 'En Attente' : activity.name as AgentStatus;
+                                    return (
+                                        <button 
+                                            key={activity.id} 
+                                            onClick={() => handleStatusChangeClick(statusToSet)} 
+                                            disabled={!canChangeStatus} 
+                                            className={`w-full text-left flex items-center gap-3 p-2 rounded-md text-slate-700 dark:text-slate-200 ${agentState?.status === statusToSet ? 'bg-indigo-50 dark:bg-indigo-900/50' : 'hover:bg-slate-100 dark:hover:bg-slate-700'} disabled:opacity-50 disabled:cursor-not-allowed`}
+                                        >
+                                            <span className={`w-2.5 h-2.5 rounded-full`} style={{backgroundColor: activity.color}}></span>
+                                            {activity.name}
+                                            {agentState?.status === statusToSet && <span className="material-symbols-outlined text-base text-indigo-600 ml-auto">check</span>}
+                                        </button>
+                                    );
+                                })}
                             </div>
                             <div className="border-t dark:border-slate-700 mt-2 pt-2"><button onClick={() => { setIsProfileModalOpen(true); setIsStatusMenuOpen(false); }} className="w-full text-left flex items-center gap-3 p-2 rounded-md text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"><span className="material-symbols-outlined text-base text-slate-500">settings</span>{t('agentView.statusManager.settings')}</button></div>
                         </div>
