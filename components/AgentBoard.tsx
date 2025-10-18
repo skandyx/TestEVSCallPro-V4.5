@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import type { AgentState, User, AgentStatus } from '../types.ts';
 import { useI18n } from '../src/i18n/index.tsx';
+import { useStore } from '../src/store/useStore.ts';
 
 interface AgentBoardProps {
     agents: AgentState[];
@@ -42,19 +43,26 @@ const formatDuration = (seconds: number) => {
 
 const AgentBoard: React.FC<AgentBoardProps> = ({ agents, currentUser, apiCall, onContactAgent }) => {
     const { t } = useI18n();
+    const { notifications } = useStore(state => ({ notifications: state.notifications }));
     const hasPermission = currentUser.role === 'Administrateur' || currentUser.role === 'Superviseur' || currentUser.role === 'SuperAdmin';
+
+    const agentsWithRaisedHand = useMemo(() =>
+        new Set(notifications.filter(n => n.type === 'help').map(n => n.agentId)),
+    [notifications]);
 
     const sortedAgents = useMemo(() => {
         const statusOrder: Record<AgentStatus, number> = {
             'Ringing': 1, 'En Appel': 2, 'Mise en attente': 3, 'En Attente': 4,
             'En Post-Appel': 5, 'En Pause': 6, 'Formation': 7, 'Déconnecté': 8,
         };
-        return [...agents].sort((a, b) => {
-            const orderA = statusOrder[a.status] || 9;
-            const orderB = statusOrder[b.status] || 9;
-            if (orderA !== orderB) return orderA - orderB;
-            return a.lastName.localeCompare(b.lastName);
-        });
+        return agents
+            .filter(agent => agent.status !== 'Déconnecté')
+            .sort((a, b) => {
+                const orderA = statusOrder[a.status] || 9;
+                const orderB = statusOrder[b.status] || 9;
+                if (orderA !== orderB) return orderA - orderB;
+                return a.lastName.localeCompare(b.lastName);
+            });
     }, [agents]);
 
     const handleSupervisorAction = async (action: string, agentId: string) => {
@@ -99,6 +107,7 @@ const AgentBoard: React.FC<AgentBoardProps> = ({ agents, currentUser, apiCall, o
                         const canCoach = hasPermission && agent.status === 'En Appel';
                         const canForcePause = hasPermission && agent.status !== 'En Pause' && agent.status !== 'Déconnecté';
                         const statusConfig = STATUS_CONFIG[agent.status];
+                        const isHandRaised = agentsWithRaisedHand.has(agent.id);
                         return (
                         <tr key={agent.id} className={agent.status === 'Déconnecté' ? 'opacity-50' : ''}>
                             <td className="px-4 py-3">
@@ -126,6 +135,11 @@ const AgentBoard: React.FC<AgentBoardProps> = ({ agents, currentUser, apiCall, o
                             <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{agent.callsHandledToday}</td>
                             <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-mono">{formatDuration(agent.averageHandlingTime)}</td>
                             <td className="px-4 py-3 text-center space-x-1">
+                                {isHandRaised && (
+                                    <span title={t('agentView.askForHelp')} className="inline-flex p-1 rounded-md text-amber-500 bg-amber-100 dark:bg-amber-900/50 mr-1 animate-bounce">
+                                        <span className="material-symbols-outlined text-base">front_hand</span>
+                                    </span>
+                                )}
                                 <button onClick={() => handleContactAgent(agent.id, agentFullName)} disabled={!hasPermission || agent.status === 'Déconnecté'} title={t('supervision.agentBoard.actions.contact', { agentName: agentFullName })} className="p-1 rounded-md text-slate-500 hover:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed dark:hover:bg-slate-700"><span className="material-symbols-outlined text-base">mail</span></button>
                                 <button onClick={() => handleSupervisorAction('listen', agent.id)} disabled={!canCoach} title={t('supervision.agentBoard.actions.listen')} className="p-1 rounded-md text-slate-500 hover:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed dark:hover:bg-slate-700"><span className="material-symbols-outlined text-base">hearing</span></button>
                                 <button onClick={() => handleSupervisorAction('coach', agent.id)} disabled={!canCoach} title={t('supervision.agentBoard.actions.coach')} className="p-1 rounded-md text-slate-500 hover:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed dark:hover:bg-slate-700"><span className="material-symbols-outlined text-base">record_voice_over</span></button>
@@ -148,5 +162,4 @@ const AgentBoard: React.FC<AgentBoardProps> = ({ agents, currentUser, apiCall, o
     );
 };
 
-// FIX: Added default export to resolve module import error in SupervisionDashboard.tsx.
 export default AgentBoard;
