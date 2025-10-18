@@ -3,7 +3,7 @@ const WebSocket = require('ws');
 const jwt = require('jsonwebtoken');
 const url = require('url');
 const { subscribe, get, set } = require('./redisClient');
-const { endAgentSession } = require('./services/db'); // Ajout de l'import
+const { endAgentSession } = require('./db'); // Ajout de l'import
 
 const ACCESS_TOKEN_SECRET = process.env.JWT_SECRET;
 let wss;
