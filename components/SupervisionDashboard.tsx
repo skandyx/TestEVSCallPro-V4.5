@@ -90,8 +90,18 @@ const SupervisionDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
     }, [campaigns, callHistory, qualifications, agentStates]);
 
     const loggedInAgents = useMemo(() => {
-        return agentStates.filter(agent => agent.status !== 'Déconnecté');
-    }, [agentStates]);
+        // Get the set of agent IDs that have an open session (logoutTime is null).
+        const activeSessionAgentIds = new Set(
+            agentSessions
+                .filter(session => session.logoutTime === null)
+                .map(session => session.agentId)
+        );
+
+        // The agentStates array contains ALL agents from the DB. We only want to show
+        // the ones that are currently logged in according to the sessions table.
+        // This ensures we see agents who are logged in but "Déconnecté", but not agents who are truly offline.
+        return agentStates.filter(agent => activeSessionAgentIds.has(agent.id));
+    }, [agentStates, agentSessions]);
 
 
     const handleContactAgent = (agentId: string, agentName: string, message: string) => {
@@ -118,9 +128,9 @@ const SupervisionDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
             case 'campaigns':
                 return <CampaignBoard campaignStates={derivedCampaignStates} />;
             case 'groups':
-                return <GroupSupervisionBoard agentStates={agentStates} userGroups={userGroups} onContactAgent={handleContactAgent} />;
+                return <GroupSupervisionBoard agentStates={loggedInAgents} userGroups={userGroups} onContactAgent={handleContactAgent} />;
             case 'sites':
-                return <SiteSupervisionBoard agentStates={agentStates} sites={sites} onContactAgent={handleContactAgent} />;
+                return <SiteSupervisionBoard agentStates={loggedInAgents} sites={sites} onContactAgent={handleContactAgent} />;
             default:
                 return null;
         }
