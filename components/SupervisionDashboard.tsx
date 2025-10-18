@@ -130,7 +130,7 @@ const SupervisionDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
                 : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:border-slate-300'
             }`}
         >
-            <span className="material-symbols-outlined w-5 h-5">{icon}</span>
+            <span className="material-symbols-outlined text-xl">{icon}</span>
             <span>{t(labelKey)}</span>
         </button>
     );
