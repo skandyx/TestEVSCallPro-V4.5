@@ -71,6 +71,7 @@ const NotificationPopover: React.FC<NotificationPopoverProps> = ({ notifications
                                         value={responseText}
                                         onChange={e => setResponseText(e.target.value)}
                                         placeholder={t('header.notifications.yourMessage')}
+                                        autoFocus
                                         className="w-full text-sm p-1.5 border rounded-md dark:bg-slate-900 dark:border-slate-600"
                                     />
                                     <button type="submit" className="text-sm bg-indigo-600 text-white px-3 rounded-md hover:bg-indigo-700">{t('header.notifications.send')}</button>

@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import type { Feature, FeatureId, User } from './types.ts';
 import { features } from './data/features.ts';
@@ -64,7 +63,6 @@ const AppContent: React.FC = () => {
         }
         // The effect should only re-run when the user's session changes.
         // The store functions are stable and should not be dependencies here.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentUser, token]);
 
     useEffect(() => {
