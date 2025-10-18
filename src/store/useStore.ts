@@ -5,7 +5,7 @@ import type {
     User, Campaign, SavedScript, Qualification, QualificationGroup, IvrFlow, AudioFile, Trunk, Did, Site,
     UserGroup, ActivityType, PersonalCallback, CallHistoryRecord, AgentSession, ContactNote,
     SystemConnectionSettings, SystemSmtpSettings, SystemAppSettings, ModuleVisibility,
-    BackupLog, BackupSchedule, SystemLog, VersionInfo, ConnectivityService, AgentState, ActiveCall, CampaignState, PlanningEvent, AgentStatus, AgentProfile
+    BackupLog, BackupSchedule, SystemLog, VersionInfo, ConnectivityService, AgentState, ActiveCall, CampaignState, PlanningEvent, AgentStatus, AgentProfile, AgentStation
 } from '../../types.ts';
 import apiClient, { publicApiClient } from '../lib/axios.ts';
 import wsClient from '../services/wsClient.ts';
@@ -98,6 +98,7 @@ interface AppState {
     agentStates: AgentState[];
     activeCalls: ActiveCall[];
     campaignStates: CampaignState[];
+    agentStation: AgentStation | null;
 
     // Actions
     login: (authData: { user: User; token: string }) => Promise<void>;
@@ -108,6 +109,7 @@ interface AppState {
     setPublicConfigLoaded: (isLoaded: boolean) => void;
     setPlayingFileId: (fileId: string | null) => void;
     handleWsEvent: (event: any) => void;
+    setAgentStation: (station: AgentStation | null) => void;
     
     // CRUD Actions
     saveOrUpdate: (entityName: EntityName, data: any) => Promise<any>;
@@ -171,12 +173,14 @@ export const useStore = create<AppState>()(
                 backupLogs: [], backupSchedule: null, systemLogs: [], versionInfo: null, connectivityServices: [],
                 // Real-time
                 agentStates: [], activeCalls: [], campaignStates: [],
+                agentStation: null,
 
                 // --- ACTIONS ---
                 
                 setAppSettings: (settings) => set({ appSettings: settings }),
                 setPublicConfigLoaded: (isLoaded) => set({ isPublicConfigLoaded: isLoaded }),
                 setPlayingFileId: (fileId) => set({ playingFileId: fileId }),
+                setAgentStation: (station) => set({ agentStation: station }),
 
                 login: async ({ user, token }) => {
                     set({ currentUser: user, token, isLoading: true });
@@ -218,7 +222,7 @@ export const useStore = create<AppState>()(
                             statusTimer = undefined;
                         }
 
-                        set({ currentUser: null, token: null, isLoading: false, users: [], agentStates: [] }); // Reset state
+                        set({ currentUser: null, token: null, isLoading: false, users: [], agentStates: [], agentStation: null }); // Reset state
                     }
                 },
                 
