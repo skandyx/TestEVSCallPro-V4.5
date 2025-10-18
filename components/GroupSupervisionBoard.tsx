@@ -123,7 +123,7 @@ const GroupSupervisionBoard: React.FC<GroupSupervisionBoardProps> = ({ agentStat
 
     const groupsWithAgents = useMemo(() => {
         return userGroups.map(group => {
-            const agentsInGroup = agentStates.filter(agent => group.memberIds.includes(agent.id));
+            const agentsInGroup = agentStates.filter(agent => agent.status !== 'Déconnecté' && group.memberIds.includes(agent.id));
             return { group, agentsInGroup };
         }).filter(item => item.agentsInGroup.length > 0)
           .sort((a, b) => a.group.name.localeCompare(b.group.name));

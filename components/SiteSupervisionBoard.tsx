@@ -120,6 +120,7 @@ const SiteSupervisionBoard: React.FC<SiteSupervisionBoardProps> = ({ agentStates
 
     const sitesWithAgents = useMemo(() => {
         const agentsBySite = agentStates
+            .filter(agent => agent.status !== 'Déconnecté')
             .reduce((acc, agent) => {
                 const siteId = agent.siteId || 'no-site';
                 if (!acc[siteId]) acc[siteId] = [];
