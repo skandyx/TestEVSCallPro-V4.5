@@ -2,7 +2,8 @@
 const WebSocket = require('ws');
 const jwt = require('jsonwebtoken');
 const url = require('url');
-const { subscribe } = require('./redisClient');
+const { subscribe, get, set } = require('./redisClient');
+const { endAgentSession } = require('./services/db'); // Ajout de l'import
 
 const ACCESS_TOKEN_SECRET = process.env.JWT_SECRET;
 let wss;
@@ -62,7 +63,7 @@ function initializeWebSocketServer(server) {
         });
     }, 30000); // 30 seconds
 
-    wss.on('connection', (ws) => {
+    wss.on('connection', async (ws) => {
         ws.isAlive = true;
         ws.on('pong', () => {
             ws.isAlive = true;
@@ -72,8 +73,17 @@ function initializeWebSocketServer(server) {
         clients.set(ws, { id: ws.user.id, role: ws.user.role, sessionId: ws.user.sessionId });
         sessionMap.set(ws.user.sessionId, ws);
         
-        // L'agent reste en statut 'Déconnecté' (celui de la BDD) jusqu'à action manuelle.
-        // La diffusion d'un statut 'En Attente' a été supprimée pour respecter ce flux.
+        // Restore agent status on reconnect
+        if (ws.user.role === 'Agent') {
+            const lastStatus = await get(`agent_status:${ws.user.id}`);
+            if (lastStatus && lastStatus !== 'Déconnecté') {
+                console.log(`[WS] Restoring status for agent ${ws.user.id} to ${lastStatus}`);
+                broadcast({
+                    type: 'agentStatusUpdate',
+                    payload: { agentId: ws.user.id, status: lastStatus }
+                });
+            }
+        }
 
         ws.on('message', (message) => {
             try {
@@ -82,13 +92,13 @@ function initializeWebSocketServer(server) {
 
                 if (event.type === 'agentStatusChange' && ws.user.role === 'Agent') {
                     handled = true;
-                    console.log(`[WS] Received agentStatusChange from ${ws.user.id}: ${event.payload.status}`);
+                    const { agentId, status } = event.payload;
+                    console.log(`[WS] Received agentStatusChange from ${ws.user.id}: ${status}`);
+                    set(`agent_status:${agentId}`, status); // Persist status in Redis
+                    
                     const broadcastEvent = {
                         type: 'agentStatusUpdate',
-                        payload: {
-                            agentId: ws.user.id,
-                            status: event.payload.status
-                        }
+                        payload: { agentId, status }
                     };
                     broadcast(broadcastEvent);
                 }
@@ -154,6 +164,11 @@ function initializeWebSocketServer(server) {
             }
             
             if (ws.user.role === 'Agent') {
+                // Termine la session dans la base de données
+                endAgentSession(ws.user.id);
+                // Met à jour le statut dans Redis
+                set(`agent_status:${ws.user.id}`, 'Déconnecté');
+                
                 const disconnectEvent = {
                     type: 'agentStatusUpdate',
                     payload: {

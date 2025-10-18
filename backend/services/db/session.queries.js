@@ -47,7 +47,30 @@ const endAgentSession = async (agentId) => {
     return null;
 };
 
+/**
+ * Closes all sessions that were not properly closed (e.g., due to a server crash).
+ * This should be run on server startup.
+ */
+const closeAllStaleSessions = async () => {
+    try {
+        const query = `
+            UPDATE agent_sessions
+            SET logout_time = login_time + interval '1 second'
+            WHERE logout_time IS NULL;
+        `;
+        const res = await pool.query(query);
+        if (res.rowCount > 0) {
+            console.log(`[DB Cleanup] Closed ${res.rowCount} stale agent session(s).`);
+        } else {
+            console.log('[DB Cleanup] No stale agent sessions found.');
+        }
+    } catch (error) {
+        console.error('[DB Cleanup] Error closing stale sessions:', error);
+    }
+};
+
 module.exports = {
     createAgentSession,
     endAgentSession,
+    closeAllStaleSessions,
 };

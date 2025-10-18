@@ -389,8 +389,16 @@ initializeWebSocketServer(server);
 initializeAmiListener();
 
 // --- START SERVER ---
-server.listen(PORT, () => {
-    const message = `HTTP server listening on port ${PORT}`;
-    console.log(`[Server] ${message}`);
-    logger.logSystem('INFO', 'Express', message);
+server.listen(PORT, async () => {
+    try {
+        await db.closeAllStaleSessions();
+        const message = `HTTP server listening on port ${PORT}`;
+        console.log(`[Server] ${message}`);
+        logger.logSystem('INFO', 'Express', message);
+    } catch (error) {
+        const message = `Server failed to start: ${error.message}`;
+        console.error(`[Server] ${message}`);
+        logger.logSystem('ERROR', 'Express', message);
+        process.exit(1);
+    }
 });
