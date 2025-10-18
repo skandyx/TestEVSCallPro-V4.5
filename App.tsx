@@ -46,13 +46,24 @@ const AppContent: React.FC = () => {
     useEffect(() => {
         if (currentUser && token) {
             setIsLoading(true);
-            // Reconnect WebSocket on refresh
+            // Reconnect WebSocket on refresh or login
             wsClient.connect(token);
-            wsClient.onMessage(handleWsEvent);
+            // Subscribe to messages and get the cleanup function
+            const unsubscribe = wsClient.onMessage(handleWsEvent);
+            
             fetchApplicationData().finally(() => setIsLoading(false));
+
+            // CRITICAL FIX: Add a cleanup function to unsubscribe when the component unmounts
+            // or when the user/token changes (i.e., on logout).
+            // This prevents adding multiple listeners and causing duplicate notifications.
+            return () => {
+                unsubscribe();
+            };
         } else {
             setIsLoading(false);
         }
+        // The effect should only re-run when the user's session changes.
+        // The store functions are stable and should not be dependencies here.
     }, [currentUser, token, fetchApplicationData, handleWsEvent]);
 
     useEffect(() => {
