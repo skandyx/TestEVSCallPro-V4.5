@@ -251,12 +251,16 @@ CREATE TABLE audio_files (
 
 -- =============================================================================
 -- Table: activity_types
--- Description: Types d'activités pour le module de planning.
+-- Description: Types d'activités pour le module de planning et statuts agents.
 -- =============================================================================
 CREATE TABLE activity_types (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
-    color TEXT
+    color TEXT,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_system BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- =============================================================================

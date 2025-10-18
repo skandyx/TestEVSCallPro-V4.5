@@ -429,6 +429,21 @@ export const useStore = create<AppState>()(
                             case 'deleteAgentProfile':
                                 state.agentProfiles = state.agentProfiles.filter(p => p.id !== payload.id);
                                 break;
+                            
+                            case 'newActivityType':
+                                if (!state.activityTypes.some(a => a.id === payload.id)) {
+                                    state.activityTypes.push(payload);
+                                }
+                                break;
+                            case 'updateActivityType': {
+                                const index = state.activityTypes.findIndex(a => a.id === payload.id);
+                                if (index > -1) state.activityTypes[index] = payload;
+                                else state.activityTypes.push(payload);
+                                break;
+                            }
+                            case 'deleteActivityType':
+                                state.activityTypes = state.activityTypes.filter(a => a.id !== payload.id);
+                                break;
 
                             case 'newQualification':
                                 // Prevent duplicates from optimistic updates

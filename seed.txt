@@ -63,11 +63,11 @@ INSERT INTO qualifications (id, code, description, "type", is_standard, is_recyc
 -- Insertion des activités par défaut pour le module de planning.
 -- =============================================================================
 
-INSERT INTO activity_types (id, name, color) VALUES
-('activity-available', 'En Attente', '#22c55e'), -- green-500 (En Attente)
-('activity-pause', 'Pause', '#f97316'),       -- orange-500 (En Pause)
-('activity-training', 'Formation', '#a855f7'),  -- purple-500 (Formation)
-('activity-disconnected', 'Déconnecté', '#6b7280'); -- gray-500
+INSERT INTO activity_types (id, name, color, is_system, is_active) VALUES
+('activity-available', 'En Attente', '#22c55e', TRUE, TRUE),
+('activity-disconnected', 'Déconnecté', '#6b7280', TRUE, TRUE),
+('activity-training', 'Formation', '#a855f7', FALSE, TRUE),
+('activity-pause', 'Pause', '#f97316', FALSE, TRUE);
 
 -- =============================================================================
 -- Fin du script d'initialisation.

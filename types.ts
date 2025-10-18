@@ -422,8 +422,10 @@ export interface ActivityType {
     id: string;
     name: string;
     color: string;
-    isActive?: boolean;
-    isSystem?: boolean;
+    isActive: boolean;
+    isSystem: boolean;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface PlanningEvent {

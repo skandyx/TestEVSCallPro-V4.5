@@ -131,6 +131,7 @@ const contactsRoutes = require(path.join(__dirname, 'routes', 'contacts.js'));
 const systemRoutes = require(path.join(__dirname, 'routes', 'system.js'));
 const audioRoutes = require(path.join(__dirname, 'routes', 'audio.js'));
 const supervisorRoutes = require(path.join(__dirname, 'routes', 'supervisor.js'));
+const activityTypesRoutes = require(path.join(__dirname, 'routes', 'activityTypes.js'));
 
 // Public routes
 app.use('/api/auth', authRoutes);
@@ -220,6 +221,7 @@ app.use('/api/contacts', contactsRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/audio-files', audioRoutes);
 app.use('/api/supervisor', supervisorRoutes);
+app.use('/api/activity-types', activityTypesRoutes);
 
 
 // --- SPECIAL SYSTEM ROUTES ---

@@ -34,7 +34,6 @@ const clearAllPlanningEvents = async () => {
     return { message: 'All planning events have been deleted.' };
 };
 
-const getActivityTypes = async () => (await pool.query('SELECT * FROM activity_types ORDER BY name')).rows.map(keysToCamel);
 const getPersonalCallbacks = async () => (await pool.query('SELECT * FROM personal_callbacks ORDER BY scheduled_time')).rows.map(keysToCamel);
 
 const createPersonalCallback = async (callback) => {
@@ -106,7 +105,6 @@ module.exports = {
     deletePlanningEvent,
     deletePlanningEventsBulk,
     clearAllPlanningEvents,
-    getActivityTypes,
     getPersonalCallbacks,
     createPersonalCallback,
     updatePersonalCallbackStatus,

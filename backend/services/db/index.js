@@ -17,6 +17,7 @@ module.exports = {
     ...require('./note.queries'),
     ...require('./session.queries'),
     ...require('./history.queries'),
+    ...require('./activityType.queries'),
     // Add other query modules here as they are created
     
     // A function to get all contacts for the application data dump.
