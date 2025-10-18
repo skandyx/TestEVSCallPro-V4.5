@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import type { User, Campaign, Contact, Qualification, SavedScript, ContactNote, PersonalCallback, AgentStatus, AgentState, AgentProfile } from '../types.ts';
+import type { User, Campaign, Contact, Qualification, SavedScript, ContactNote, PersonalCallback, AgentStatus, AgentState, AgentProfile, ActivityType, AgentStation, Site } from '../types.ts';
 import AgentPreview from './AgentPreview.tsx';
 import UserProfileModal from './UserProfileModal.tsx';
 import apiClient from '../src/lib/axios.ts';
@@ -12,6 +12,7 @@ import ContactSearchModal from './ContactSearchModal.tsx';
 import QualificationModal from './QualificationModal.tsx';
 import CampaignSelectionModal from './CampaignSelectionModal.tsx';
 import { useStore } from '../src/store/useStore.ts';
+import StationSelectionModal from './StationSelectionModal.tsx';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -108,10 +109,8 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
 
     const { 
         currentUser, campaigns, qualifications, savedScripts, contactNotes, users, personalCallbacks,
-        agentStates, agentProfiles, logout, fetchApplicationData, theme, setTheme, changeAgentStatus, callHistory,
-        showAlert,
-        notifications,
-        handleWsEvent,
+        agentStates, agentProfiles, sites, activityTypes, logout, fetchApplicationData, theme, setTheme, changeAgentStatus, callHistory,
+        showAlert, notifications, handleWsEvent, agentStation, setAgentStation,
     } = useStore(state => ({
         currentUser: state.currentUser!,
         campaigns: state.campaigns,
@@ -122,6 +121,8 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
         personalCallbacks: state.personalCallbacks,
         agentStates: state.agentStates,
         agentProfiles: state.agentProfiles,
+        sites: state.sites,
+        activityTypes: state.activityTypes,
         logout: state.logout,
         fetchApplicationData: state.fetchApplicationData,
         theme: state.theme,
@@ -131,6 +132,8 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
         showAlert: state.showAlert,
         notifications: state.notifications,
         handleWsEvent: state.handleWsEvent,
+        agentStation: state.agentStation,
+        setAgentStation: state.setAgentStation,
     }));
 
     // Pour la compatibilité du reste du code, on simule le 'setter' local
@@ -168,6 +171,7 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
     const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
     const [isRaiseHandDisabled, setIsRaiseHandDisabled] = useState(false);
     const raiseHandTimeoutRef = useRef<number | null>(null);
+    const [isStationModalOpen, setIsStationModalOpen] = useState(false);
 
     const status = agentState?.status || 'Déconnecté';
     
@@ -252,6 +256,26 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
             .sort((a,b) => parseInt(a.code) - parseInt(b.code));
     }, [currentCampaign, qualifications]);
 
+    const handleStationSelect = (station: string) => {
+        const agentSite = sites.find(s => s.id === currentUser.siteId);
+        const stationInfo: AgentStation = {
+            extension: station,
+            siteId: agentSite?.id || '',
+            siteName: agentSite?.name || 'N/A',
+        };
+        setAgentStation(stationInfo);
+        changeAgentStatus('En Attente');
+        setIsStationModalOpen(false);
+    };
+
+    const handleStatusChangeClick = (newStatus: AgentStatus) => {
+        setIsStatusMenuOpen(false);
+        if (newStatus === 'En Attente') {
+            setIsStationModalOpen(true);
+        } else {
+            changeAgentStatus(newStatus);
+        }
+    };
 
     useEffect(() => {
         if (assignedCampaigns.length > 0 && !activeDialingCampaignId) {
@@ -685,13 +709,9 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
         return `${h}:${m}:${s}`;
     };
     
-    const canChangeStatus = !['En Appel', 'En Post-Appel'].includes(status);
-    const statuses: { id: AgentStatus, i18nKey: string, color: string, led: string }[] = [
-        { id: 'En Attente', i18nKey: 'agentView.statuses.available', color: 'bg-green-500', led: getStatusColor('En Attente') },
-        { id: 'En Pause', i18nKey: 'agentView.statuses.onPause', color: 'bg-orange-500', led: getStatusColor('En Pause') },
-        { id: 'Formation', i18nKey: 'agentView.statuses.training', color: 'bg-purple-500', led: getStatusColor('Formation') },
-    ];
-    
+    const canChangeStatus = !['En Appel', 'En Post-Appel', 'Ringing'].includes(status);
+    const availablePauseStatuses = activityTypes.filter(at => at.id !== 'activity-available');
+
     const wrapUpTotal = campaignForWrapUp.current?.wrapUpTime || 0;
     const wrapUpElapsed = agentState?.statusDuration || 0;
     const wrapUpRemaining = Math.max(0, wrapUpTotal - wrapUpElapsed);
@@ -704,7 +724,7 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
              <ContactSearchModal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} campaigns={assignedCampaigns} onSelectContact={handleSelectContactFromSearch} />
              <QualificationModal isOpen={isQualifyModalOpen} onClose={() => setIsQualifyModalOpen(false)} qualifications={qualificationsForCampaign} onQualify={handleQualifyAndEnd} />
              {isCampaignModalOpen && <CampaignSelectionModal isOpen={isCampaignModalOpen} onClose={() => setIsCampaignModalOpen(false)} assignedCampaigns={assignedCampaigns} activeDialingCampaignId={activeDialingCampaignId} onCampaignToggle={handleCampaignSelection} />}
-
+             <StationSelectionModal isOpen={isStationModalOpen} onClose={() => setIsStationModalOpen(false)} onSelect={handleStationSelect} />
 
              <header className="flex-shrink-0 bg-white dark:bg-slate-800 shadow-md p-3 flex justify-between items-center z-10">
                 <div ref={statusMenuRef} className="relative flex items-center gap-4">
@@ -713,12 +733,21 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
                         <span className={`absolute top-0 right-0 block h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-800 ${getStatusColor(agentState?.status)}`}></span>
                     </button>
                     <div className="text-left">
-                        <p className="font-bold text-slate-800 dark:text-slate-100">{currentUser.firstName} {currentUser.lastName} - {t('agentView.extension', { ext: currentUser.loginId })}</p>
+                        <p className="font-bold text-slate-800 dark:text-slate-100">{currentUser.firstName} {currentUser.lastName} - Poste {agentStation ? agentStation.extension : currentUser.loginId}</p>
                          {agentState && (<div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2"><span className={`w-2 h-2 rounded-full ${getStatusColor(agentState.status)}`}></span><span>{t(statusToI18nKey(agentState.status))}</span><span className="font-mono">{formatTimer(agentState.statusDuration)}</span></div>)}
                     </div>
                     {isStatusMenuOpen && (
                          <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-md shadow-lg border dark:border-slate-700 p-2 z-20">
-                            <div className="space-y-1">{statuses.map(s => (<button key={s.id} onClick={() => { changeAgentStatus(s.id); setIsStatusMenuOpen(false); }} disabled={!canChangeStatus} className={`w-full text-left flex items-center gap-3 p-2 rounded-md text-slate-700 dark:text-slate-200 ${agentState?.status === s.id ? 'bg-indigo-50 dark:bg-indigo-900/50' : 'hover:bg-slate-100 dark:hover:bg-slate-700'} disabled:opacity-50 disabled:cursor-not-allowed`}><span className={`w-2.5 h-2.5 rounded-full ${s.led}`}></span>{t(s.i18nKey)}{agentState?.status === s.id && <span className="material-symbols-outlined text-base text-indigo-600 ml-auto">check</span>}</button>))}</div>
+                            <div className="space-y-1">
+                                 <button onClick={() => handleStatusChangeClick('En Attente')} disabled={!canChangeStatus} className={`w-full text-left flex items-center gap-3 p-2 rounded-md text-slate-700 dark:text-slate-200 ${agentState?.status === 'En Attente' ? 'bg-indigo-50 dark:bg-indigo-900/50' : 'hover:bg-slate-100 dark:hover:bg-slate-700'} disabled:opacity-50 disabled:cursor-not-allowed`}>
+                                     <span className={`w-2.5 h-2.5 rounded-full ${getStatusColor('En Attente')}`}></span>{t('agentView.statuses.available')}{agentState?.status === 'En Attente' && <span className="material-symbols-outlined text-base text-indigo-600 ml-auto">check</span>}
+                                 </button>
+                                {availablePauseStatuses.map(activity => (
+                                     <button key={activity.id} onClick={() => handleStatusChangeClick(activity.name as AgentStatus)} disabled={!canChangeStatus} className={`w-full text-left flex items-center gap-3 p-2 rounded-md text-slate-700 dark:text-slate-200 ${agentState?.status === activity.name ? 'bg-indigo-50 dark:bg-indigo-900/50' : 'hover:bg-slate-100 dark:hover:bg-slate-700'} disabled:opacity-50 disabled:cursor-not-allowed`}>
+                                         <span className={`w-2.5 h-2.5 rounded-full`} style={{backgroundColor: activity.color}}></span>{activity.name}{agentState?.status === activity.name && <span className="material-symbols-outlined text-base text-indigo-600 ml-auto">check</span>}
+                                     </button>
+                                ))}
+                            </div>
                             <div className="border-t dark:border-slate-700 mt-2 pt-2"><button onClick={() => { setIsProfileModalOpen(true); setIsStatusMenuOpen(false); }} className="w-full text-left flex items-center gap-3 p-2 rounded-md text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"><span className="material-symbols-outlined text-base text-slate-500">settings</span>{t('agentView.statusManager.settings')}</button></div>
                         </div>
                     )}
