@@ -109,7 +109,9 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
     const { 
         currentUser, campaigns, qualifications, savedScripts, contactNotes, users, personalCallbacks,
         agentStates, agentProfiles, logout, fetchApplicationData, theme, setTheme, changeAgentStatus, callHistory,
-        showAlert
+        showAlert,
+        notifications,
+        handleWsEvent,
     } = useStore(state => ({
         currentUser: state.currentUser!,
         campaigns: state.campaigns,
@@ -127,7 +129,15 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
         changeAgentStatus: state.changeAgentStatus,
         callHistory: state.callHistory,
         showAlert: state.showAlert,
+        notifications: state.notifications,
+        handleWsEvent: state.handleWsEvent,
     }));
+
+    // Pour la compatibilité du reste du code, on simule le 'setter' local
+    const setAgentNotifications = (updater: any) => {
+        const newNotifications = typeof updater === 'function' ? updater(notifications) : updater;
+        handleWsEvent({ type: 'SET_NOTIFICATIONS', payload: newNotifications });
+    };
     
     const agentState: AgentState | undefined = useMemo(() => agentStates.find(a => a.id === currentUser.id), [currentUser, agentStates]);
     const agentProfile: AgentProfile | undefined = useMemo(() => agentProfiles.find(p => p.id === currentUser.agentProfileId), [currentUser, agentProfiles]);
@@ -143,7 +153,6 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
     const [isCallbackModalOpen, setIsCallbackModalOpen] = useState(false);
     const [isRelaunchModalOpen, setIsRelaunchModalOpen] = useState(false);
     const [activeDialingCampaignId, setActiveDialingCampaignId] = useState<string | null>(null);
-    const [agentNotifications, setAgentNotifications] = useState<SupervisorNotification[]>([]);
     const [isAgentNotifOpen, setIsAgentNotifOpen] = useState(false);
     const [activeReplyId, setActiveReplyId] = useState<number | string | null>(null);
     const [replyText, setReplyText] = useState('');
@@ -157,6 +166,8 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
     const [isQualifyModalOpen, setIsQualifyModalOpen] = useState(false);
     const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
+    const [isRaiseHandDisabled, setIsRaiseHandDisabled] = useState(false);
+    const raiseHandTimeoutRef = useRef<number | null>(null);
 
     const status = agentState?.status || 'Déconnecté';
     
@@ -260,29 +271,6 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        if (token) wsClient.connect(token);
-        const handleWebSocketMessage = (event: any) => {
-            if (event.type === 'supervisorMessage') {
-                const newNotif: SupervisorNotification = { 
-                    id: event.payload.id || Date.now(), 
-                    from: event.payload.from, 
-                    message: event.payload.message, 
-                    timestamp: new Date().toISOString() 
-                };
-                setAgentNotifications(prev => {
-                    if (prev.some(n => n.id === newNotif.id)) {
-                        return prev;
-                    }
-                    return [newNotif, ...prev];
-                });
-            }
-        };
-        const unsubscribe = wsClient.onMessage(handleWebSocketMessage);
-        return () => { unsubscribe(); wsClient.disconnect(); };
     }, []);
 
     useEffect(() => {
@@ -549,10 +537,27 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
     };
 
     const handleRaiseHand = useCallback(() => {
+        if (isRaiseHandDisabled) return; // Empêche les clics multiples
+
         wsClient.send({ type: 'agentRaisedHand', payload: { agentId: currentUser.id, agentName: `${currentUser.firstName} ${currentUser.lastName}`, agentLoginId: currentUser.loginId }});
-        setFeedbackMessage(t('agentView.askForHelp'));
-        setTimeout(() => setFeedbackMessage(null), 3000);
-    }, [currentUser, t]);
+        setFeedbackMessage(t('agentView.helpRequestSent'));
+        setIsRaiseHandDisabled(true); // Désactive le bouton
+
+        // Réactive le bouton après 10 secondes
+        raiseHandTimeoutRef.current = window.setTimeout(() => {
+            setIsRaiseHandDisabled(false);
+            setFeedbackMessage(null);
+        }, 10000); 
+    }, [currentUser, t, isRaiseHandDisabled]);
+
+    // Nettoie le timeout si le composant est démonté
+    useEffect(() => {
+        return () => {
+            if (raiseHandTimeoutRef.current) {
+                clearTimeout(raiseHandTimeoutRef.current);
+            }
+        };
+    }, []);
 
     const handleRespondToSupervisor = (notificationId: number | string) => {
         if (!replyText.trim()) return;
@@ -724,8 +729,8 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
                         <span className="material-symbols-outlined mr-2 text-base">list</span>
                         {t('agentView.campaignList.button')}
                     </button>
-                    {agentProfile?.callControlsConfig?.raiseHand && <button onClick={handleRaiseHand} title={t('agentView.askForHelp')} className="p-2 rounded-full text-amber-500 bg-amber-100 dark:bg-amber-900/50 hover:bg-amber-200 dark:hover:bg-amber-900"><span className="material-symbols-outlined">front_hand</span></button>}
-                    <div className="relative"><button onClick={() => setIsAgentNotifOpen(p => !p)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400"><span className="material-symbols-outlined">notifications</span>{agentNotifications.length > 0 && (<span className="absolute top-1 right-1 flex h-4 w-4"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-white text-xs items-center justify-center">{agentNotifications.length}</span></span>)}</button>{isAgentNotifOpen && (<div className="absolute right-0 mt-2 w-80 origin-top-right bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20"><div className="p-3 border-b dark:border-slate-700 flex justify-between items-center"><h3 className="font-semibold text-slate-800 dark:text-slate-200">{t('agentView.messages')}</h3>{agentNotifications.length > 0 && <button onClick={() => setAgentNotifications([])} className="text-xs font-medium text-indigo-600 hover:underline">{t('agentView.clearAll')}</button>}</div><div className="max-h-96 overflow-y-auto">{agentNotifications.length === 0 ? (<p className="text-sm text-slate-500 text-center p-8">Aucun nouveau message.</p>) : (agentNotifications.map(notif => (<div key={String(notif.id)} className="p-3 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"><p className="text-sm text-slate-700 dark:text-slate-200"><span className="font-bold">{notif.from}:</span> {notif.message}</p><p className="text-xs text-slate-400 mt-1">{new Date(notif.timestamp).toLocaleString(language, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}</p>{activeReplyId === notif.id ? (<form onSubmit={(e) => { e.preventDefault(); handleRespondToSupervisor(notif.id); }} className="mt-2 flex gap-2"><input type="text" value={replyText} onChange={e => setReplyText(e.target.value)} placeholder={t('agentView.yourResponsePlaceholder')} autoFocus className="w-full text-sm p-1.5 border rounded-md dark:bg-slate-900 dark:border-slate-600"/><button type="submit" className="text-sm bg-indigo-600 text-white px-3 rounded-md hover:bg-indigo-700">{t('common.send')}</button></form>) : (<button onClick={() => setActiveReplyId(notif.id)} className="mt-2 text-xs font-semibold text-indigo-600 hover:underline">{t('agentView.respond')}</button>)}</div>)))}</div></div>)}</div>
+                    {agentProfile?.callControlsConfig?.raiseHand && <button onClick={handleRaiseHand} title={t('agentView.askForHelp')} disabled={isRaiseHandDisabled} className="p-2 rounded-full text-amber-500 bg-amber-100 dark:bg-amber-900/50 hover:bg-amber-200 dark:hover:bg-amber-900 disabled:opacity-50 disabled:cursor-wait"><span className="material-symbols-outlined">front_hand</span></button>}
+                    <div className="relative"><button onClick={() => setIsAgentNotifOpen(p => !p)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400"><span className="material-symbols-outlined">notifications</span>{notifications.length > 0 && (<span className="absolute top-1 right-1 flex h-4 w-4"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-white text-xs items-center justify-center">{notifications.length}</span></span>)}</button>{isAgentNotifOpen && (<div className="absolute right-0 mt-2 w-80 origin-top-right bg-white dark:bg-slate-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20"><div className="p-3 border-b dark:border-slate-700 flex justify-between items-center"><h3 className="font-semibold text-slate-800 dark:text-slate-200">{t('agentView.messages')}</h3>{notifications.length > 0 && <button onClick={() => setAgentNotifications([])} className="text-xs font-medium text-indigo-600 hover:underline">{t('agentView.clearAll')}</button>}</div><div className="max-h-96 overflow-y-auto">{notifications.length === 0 ? (<p className="text-sm text-slate-500 text-center p-8">Aucun nouveau message.</p>) : (notifications.map(notif => (<div key={String(notif.id)} className="p-3 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"><p className="text-sm text-slate-700 dark:text-slate-200"><span className="font-bold">{notif.from}:</span> {notif.message}</p><p className="text-xs text-slate-400 mt-1">{new Date(notif.timestamp).toLocaleString(language, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}</p>{activeReplyId === notif.id ? (<form onSubmit={(e) => { e.preventDefault(); handleRespondToSupervisor(notif.id); }} className="mt-2 flex gap-2"><input type="text" value={replyText} onChange={e => setReplyText(e.target.value)} placeholder={t('agentView.yourResponsePlaceholder')} autoFocus className="w-full text-sm p-1.5 border rounded-md dark:bg-slate-900 dark:border-slate-600"/><button type="submit" className="text-sm bg-indigo-600 text-white px-3 rounded-md hover:bg-indigo-700">{t('common.send')}</button></form>) : (<button onClick={() => setActiveReplyId(notif.id)} className="mt-2 text-xs font-semibold text-indigo-600 hover:underline">{t('agentView.respond')}</button>)}</div>)))}</div></div>)}</div>
                     <LanguageSwitcher />
                     <ThemeSwitcher theme={theme} setTheme={setTheme} />
                     <button onClick={logout} className="font-semibold py-2 px-4 rounded-lg inline-flex items-center bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"><span className="material-symbols-outlined mr-2">power_settings_new</span> {t('sidebar.logout')}</button>

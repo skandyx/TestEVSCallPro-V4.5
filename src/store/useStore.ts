@@ -500,7 +500,12 @@ export const useStore = create<AppState>()(
                                 state.notifications.push({ ...payload, id: Date.now(), type: 'help', timestamp: new Date().toISOString() });
                                 break;
                             case 'supervisorMessage':
-                                state.notifications.push({ ...payload, id: Date.now(), type: 'message' });
+                                if (state.currentUser?.role === 'Agent') {
+                                    const newNotif = { ...payload, id: payload.id || Date.now() };
+                                    if (!state.notifications.some(n => n.id === newNotif.id)) {
+                                        state.notifications.unshift(newNotif);
+                                    }
+                                }
                                 break;
                             case 'SET_NOTIFICATIONS':
                                 state.notifications = payload;

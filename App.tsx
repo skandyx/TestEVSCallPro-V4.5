@@ -61,7 +61,7 @@ const AppContent: React.FC = () => {
             return () => {
                 // ✅ Supprime les listeners
                 unsubscribe?.();
-                unsubscribe();  
+                
                 wsClient.disconnect();
 
                 // ✅ Optionnel mais safe : ferme aussi le WS pour un reset complet
@@ -71,7 +71,7 @@ const AppContent: React.FC = () => {
             setIsLoading(false);
             // Si logout → tu peux aussi forcer un WS reset ici :
             wsClient.disconnect?.();
-            wsClient.disconnect();
+           
         }
     }, [currentUser, token]);
 
