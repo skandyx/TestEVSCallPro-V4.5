@@ -88,10 +88,7 @@ const NotificationPopover: React.FC<NotificationPopoverProps> = ({ notifications
 };
 
 
-interface HeaderProps {
-    activeView: 'app' | 'monitoring';
-    onViewChange: (view: 'app' | 'monitoring') => void;
-}
+interface HeaderProps {}
 
 const Clock: React.FC = () => {
     const [time, setTime] = useState(new Date());
@@ -128,7 +125,7 @@ const LanguageSwitcher: React.FC = () => {
 }
 
 
-const Header: React.FC<HeaderProps> = ({ activeView, onViewChange }) => {
+const Header: React.FC<HeaderProps> = () => {
     const { t } = useI18n();
     const [isNotifOpen, setIsNotifOpen] = useState(false);
     const { currentUser, notifications, setNotifications } = useStore(state => ({
@@ -155,18 +152,8 @@ const Header: React.FC<HeaderProps> = ({ activeView, onViewChange }) => {
         setNotifications([]);
     };
 
-    const TabButton: React.FC<{ viewName: 'app' | 'monitoring'; labelKey: string; icon: string; }> = ({ viewName, labelKey, icon }) => (
-        <button onClick={() => onViewChange(viewName)} className={`flex items-center space-x-2 px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${activeView === viewName ? 'border-primary text-link' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600'}`}>
-            <span className="material-symbols-outlined text-xl">{icon}</span><span>{t(labelKey)}</span>
-        </button>
-    );
-
     return (
-        <header className="flex-shrink-0 bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700 flex justify-between items-center px-4">
-            <nav className="flex space-x-2">
-                <TabButton viewName="app" labelKey="header.tabs.application" icon="build" />
-                <TabButton viewName="monitoring" labelKey="header.tabs.monitoring" icon="data_usage" />
-            </nav>
+        <header className="flex-shrink-0 bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700 flex justify-end items-center px-4 h-16">
             <div className="flex items-center gap-4">
                 <Clock />
                 <div className="relative">

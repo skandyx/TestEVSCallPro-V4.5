@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import type { Feature, FeatureId, User } from './types.ts';
 import { features } from './data/features.ts';
@@ -9,7 +10,6 @@ import Sidebar from './components/Sidebar.tsx';
 import Header from './components/Header.tsx';
 import FeatureDetail from './components/FeatureDetail.tsx';
 import AgentView from './components/AgentView.tsx';
-import MonitoringDashboard from './components/MonitoringDashboard.tsx';
 import UserProfileModal from './components/UserProfileModal.tsx';
 import { publicApiClient } from './src/lib/axios.ts';
 import wsClient from './src/services/wsClient.ts';
@@ -40,7 +40,6 @@ const AppContent: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [activeFeatureId, setActiveFeatureId] = useState<FeatureId | null>(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
-    const [appView, setAppView] = useState<'app' | 'monitoring'>('app');
 
     useEffect(() => {
         if (currentUser && token) {
@@ -139,15 +138,11 @@ const AppContent: React.FC = () => {
                 onOpenProfile={() => setShowProfileModal(true)}
             />
             <div className="flex-1 flex flex-col overflow-hidden">
-                <Header activeView={appView} onViewChange={setAppView} />
+                <Header />
                 <main className="flex-1 overflow-y-auto p-8">
-                    {appView === 'monitoring' ? (
-                        <MonitoringDashboard />
-                    ) : (
-                        <Suspense fallback={<LoadingSpinner />}>
-                            {ActiveComponent ? <ActiveComponent feature={activeFeature} /> : <FeatureDetail feature={null} />}
-                        </Suspense>
-                    )}
+                    <Suspense fallback={<LoadingSpinner />}>
+                        {ActiveComponent ? <ActiveComponent feature={activeFeature} /> : <FeatureDetail feature={null} />}
+                    </Suspense>
                 </main>
             </div>
         </div>

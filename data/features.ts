@@ -655,6 +655,32 @@ export const features: Feature[] = [
         simplificationTip: { titleKey: '', contentKey: '' }
     },
     {
+        id: 'monitoring',
+        titleKey: 'header.tabs.monitoring',
+        category: 'System',
+        descriptionKey: 'features.monitoring.description',
+        component: lazy(() => import('../components/MonitoringDashboard.tsx')),
+        userJourney: {
+            titleKey: 'features.monitoring.userJourney.title',
+            stepsKeys: [
+                'features.monitoring.userJourney.steps.0',
+                'features.monitoring.userJourney.steps.1',
+                'features.monitoring.userJourney.steps.2',
+            ],
+        },
+        specs: {
+            titleKey: 'features.monitoring.specs.title',
+            pointsKeys: [
+                'features.monitoring.specs.points.0',
+                'features.monitoring.specs.points.1',
+            ],
+        },
+        simplificationTip: {
+            titleKey: 'features.monitoring.simplificationTip.title',
+            contentKey: 'features.monitoring.simplificationTip.content'
+        }
+    },
+    {
         id: 'help',
         titleKey: 'features.help.title',
         category: 'System',
