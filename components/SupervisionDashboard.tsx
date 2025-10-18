@@ -90,13 +90,8 @@ const SupervisionDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
     }, [campaigns, callHistory, qualifications, agentStates]);
 
     const loggedInAgents = useMemo(() => {
-        const loggedInAgentIds = new Set(
-            agentSessions
-                .filter(s => s.logoutTime === null)
-                .map(s => s.agentId)
-        );
-        return agentStates.filter(agent => loggedInAgentIds.has(agent.id));
-    }, [agentSessions, agentStates]);
+        return agentStates.filter(agent => agent.status !== 'Déconnecté');
+    }, [agentStates]);
 
 
     const handleContactAgent = (agentId: string, agentName: string, message: string) => {
