@@ -93,6 +93,16 @@ export const features: Feature[] = [
         }
     },
     {
+        id: 'activity-types',
+        titleKey: 'features.activity-types.title',
+        category: 'Agent',
+        descriptionKey: 'features.activity-types.description',
+        component: lazy(() => import('../components/ActivityManager.tsx')),
+        userJourney: { titleKey: 'features.activity-types.userJourney.title', stepsKeys: [] },
+        specs: { titleKey: 'features.activity-types.specs.title', pointsKeys: [] },
+        simplificationTip: { titleKey: 'features.activity-types.simplificationTip.title', contentKey: 'features.activity-types.simplificationTip.content' }
+    },
+    {
         id: 'planning',
         titleKey: 'features.planning.title',
         category: 'Agent',

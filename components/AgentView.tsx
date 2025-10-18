@@ -710,7 +710,7 @@ const AgentView: React.FC<AgentViewProps> = ({ onUpdatePassword, onUpdateProfile
     };
     
     const canChangeStatus = !['En Appel', 'En Post-Appel', 'Ringing'].includes(status);
-    const availablePauseStatuses = activityTypes.filter(at => at.id !== 'activity-available');
+    const availablePauseStatuses = activityTypes.filter(at => at.id !== 'activity-available' && at.id !== 'activity-disconnected');
 
     const wrapUpTotal = campaignForWrapUp.current?.wrapUpTime || 0;
     const wrapUpElapsed = agentState?.statusDuration || 0;

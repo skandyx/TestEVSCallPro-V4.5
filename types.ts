@@ -4,6 +4,7 @@ export type FeatureId =
   | 'users'
   | 'groups'
   | 'agent-profiles'
+  | 'activity-types'
   | 'trunks'
   | 'dids'
   | 'outbound'
@@ -421,6 +422,8 @@ export interface ActivityType {
     id: string;
     name: string;
     color: string;
+    isActive?: boolean;
+    isSystem?: boolean;
 }
 
 export interface PlanningEvent {

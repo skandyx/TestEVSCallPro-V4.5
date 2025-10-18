@@ -12,7 +12,7 @@ import wsClient from '../services/wsClient.ts';
 
 type Theme = 'light' | 'dark' | 'system';
 // FIX: Add 'agent-profiles' to EntityName to allow it as a parameter in CRUD functions.
-type EntityName = 'users' | 'campaigns' | 'scripts' | 'user-groups' | 'qualification-groups' | 'qualifications' | 'ivr-flows' | 'trunks' | 'dids' | 'sites' | 'audio-files' | 'agent-profiles';
+type EntityName = 'users' | 'campaigns' | 'scripts' | 'user-groups' | 'qualification-groups' | 'qualifications' | 'ivr-flows' | 'trunks' | 'dids' | 'sites' | 'audio-files' | 'agent-profiles' | 'activity-types';
 
 // FIX: Add Alert interface for the new alert manager system.
 interface Alert {
@@ -44,6 +44,7 @@ const storeKeyMap: Record<EntityName, keyof AppState> = {
     'sites': 'sites',
     'audio-files': 'audioFiles',
     'agent-profiles': 'agentProfiles',
+    'activity-types': 'activityTypes',
 };
 
 interface AppState {
