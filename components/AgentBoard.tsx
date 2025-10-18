@@ -55,8 +55,7 @@ const AgentBoard: React.FC<AgentBoardProps> = ({ agents, currentUser, apiCall, o
             'Ringing': 1, 'En Appel': 2, 'Mise en attente': 3, 'En Attente': 4,
             'En Post-Appel': 5, 'En Pause': 6, 'Formation': 7, 'Déconnecté': 8,
         };
-        return agents
-            .filter(agent => agent.status !== 'Déconnecté')
+        return [...agents]
             .sort((a, b) => {
                 const orderA = statusOrder[a.status] || 9;
                 const orderB = statusOrder[b.status] || 9;
@@ -109,7 +108,7 @@ const AgentBoard: React.FC<AgentBoardProps> = ({ agents, currentUser, apiCall, o
                         const statusConfig = STATUS_CONFIG[agent.status];
                         const isHandRaised = agentsWithRaisedHand.has(agent.id);
                         return (
-                        <tr key={agent.id} className={agent.status === 'Déconnecté' ? 'opacity-50' : ''}>
+                        <tr key={agent.id} className={agent.status === 'Déconnecté' ? 'opacity-60' : ''}>
                             <td className="px-4 py-3">
                                 <div className="flex items-center">
                                     <div className="relative flex-shrink-0">

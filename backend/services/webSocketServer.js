@@ -71,17 +71,9 @@ function initializeWebSocketServer(server) {
         console.log(`[WS] Client connected: User ID ${ws.user.id}, Role ${ws.user.role}, Session ${ws.user.sessionId}`);
         clients.set(ws, { id: ws.user.id, role: ws.user.role, sessionId: ws.user.sessionId });
         sessionMap.set(ws.user.sessionId, ws);
-
-        if (ws.user.role === 'Agent') {
-            const connectEvent = {
-                type: 'agentStatusUpdate',
-                payload: {
-                    agentId: ws.user.id,
-                    status: 'En Attente'
-                }
-            };
-            broadcast(connectEvent);
-        }
+        
+        // L'agent reste en statut 'Déconnecté' (celui de la BDD) jusqu'à action manuelle.
+        // La diffusion d'un statut 'En Attente' a été supprimée pour respecter ce flux.
 
         ws.on('message', (message) => {
             try {
