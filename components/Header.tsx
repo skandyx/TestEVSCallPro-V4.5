@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ComputerDesktopIcon, SunIcon, MoonIcon, ChevronDownIcon, BellAlertIcon } from './Icons.tsx';
+import { ComputerDesktopIcon, SunIcon, MoonIcon, ChevronDownIcon } from './Icons.tsx';
 import { useI18n } from '../src/i18n/index.tsx';
 // FIX: Corrected module import path to resolve module resolution error.
 import { useStore } from '../src/store/useStore.ts';
@@ -13,6 +13,7 @@ interface Notification {
     agentName: string;
     agentLoginId: string;
     timestamp: string;
+    type: string;
 }
 
 interface NotificationPopoverProps {
@@ -53,9 +54,14 @@ const NotificationPopover: React.FC<NotificationPopoverProps> = ({ notifications
                 ) : (
                     notifications.map(notif => (
                         <div key={notif.id} className="p-3 border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700">
-                            <p className="text-sm text-slate-700 dark:text-slate-200">
-                                {t('header.notifications.needsHelp', { agentName: notif.agentName, agentLoginId: notif.agentLoginId })}
-                            </p>
+                            <div className="flex items-start">
+                                {notif.type === 'help' && (
+                                    <span className="material-symbols-outlined text-amber-500 mr-2 mt-0.5">front_hand</span>
+                                )}
+                                <p className="text-sm text-slate-700 dark:text-slate-200 flex-1">
+                                    {t('header.notifications.needsHelp', { agentName: notif.agentName, agentLoginId: notif.agentLoginId })}
+                                </p>
+                            </div>
                             <p className="text-xs text-slate-400 mt-1">{new Date(notif.timestamp).toLocaleString(language, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })}</p>
                             {targetNotificationId === notif.id ? (
                                 <form onSubmit={(e) => handleSendResponse(e, notif)} className="mt-2 flex gap-2">
@@ -164,7 +170,7 @@ const Header: React.FC<HeaderProps> = ({ activeView, onViewChange }) => {
                 <Clock />
                 <div className="relative">
                     <button onClick={() => setIsNotifOpen(p => !p)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400">
-                        <BellAlertIcon className="w-6 h-6" />
+                        <span className="material-symbols-outlined text-2xl">chat</span>
                         {notifications.length > 0 && (
                             <span className="absolute top-1 right-1 flex h-4 w-4">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>

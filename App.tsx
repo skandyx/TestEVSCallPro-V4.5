@@ -64,7 +64,8 @@ const AppContent: React.FC = () => {
         }
         // The effect should only re-run when the user's session changes.
         // The store functions are stable and should not be dependencies here.
-    }, [currentUser, token, fetchApplicationData, handleWsEvent]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentUser, token]);
 
     useEffect(() => {
       const handleLogoutEvent = () => logout();
