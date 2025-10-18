@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import type { Feature, AgentState, ActiveCall, CampaignState, User, Campaign } from '../types.ts';
+import type { Feature, AgentState, ActiveCall, CampaignState, User, Campaign, AgentSession } from '../types.ts';
 import AgentBoard from './AgentBoard.tsx';
 import CallBoard from './CallBoard.tsx';
 import CampaignBoard from './CampaignBoard.tsx';
@@ -29,7 +29,7 @@ const KpiCard: React.FC<{ title: string; value: string | number; icon: string }>
 const SupervisionDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
     const { 
         users, campaigns, currentUser, agentStates, activeCalls, 
-        userGroups, sites, showAlert, callHistory, qualifications
+        userGroups, sites, showAlert, callHistory, qualifications, agentSessions
     } = useStore(state => ({
         users: state.users,
         campaigns: state.campaigns,
@@ -41,6 +41,7 @@ const SupervisionDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
         showAlert: state.showAlert,
         callHistory: state.callHistory,
         qualifications: state.qualifications,
+        agentSessions: state.agentSessions,
     }));
     
     const [activeTab, setActiveTab] = useState<Tab>('agents');
@@ -88,6 +89,15 @@ const SupervisionDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
             });
     }, [campaigns, callHistory, qualifications, agentStates]);
 
+    const loggedInAgents = useMemo(() => {
+        const loggedInAgentIds = new Set(
+            agentSessions
+                .filter(s => s.logoutTime === null)
+                .map(s => s.agentId)
+        );
+        return agentStates.filter(agent => loggedInAgentIds.has(agent.id));
+    }, [agentSessions, agentStates]);
+
 
     const handleContactAgent = (agentId: string, agentName: string, message: string) => {
         if (currentUser) {
@@ -107,7 +117,7 @@ const SupervisionDashboard: React.FC<{ feature: Feature }> = ({ feature }) => {
         if (!currentUser) return null;
         switch (activeTab) {
             case 'agents':
-                return <AgentBoard agents={agentStates} currentUser={currentUser} apiCall={apiClient} onContactAgent={handleContactAgent} />;
+                return <AgentBoard agents={loggedInAgents} currentUser={currentUser} apiCall={apiClient} onContactAgent={handleContactAgent} />;
             case 'calls':
                 return <CallBoard calls={activeCalls} agents={users} campaigns={campaigns} />;
             case 'campaigns':
